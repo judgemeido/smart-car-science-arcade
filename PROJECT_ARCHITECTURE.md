@@ -2,7 +2,7 @@
 
 更新于 2026-11-08，反映模块化翻新后的实际代码。[翻新前架构](docs/architecture/2026-11-08-before-refactor.md)已归档。
 
-本轮整理01–04内部代码，保留最终用户现有体验，让内容和小游戏更容易修改。本文件描述已实现结构，详细修改路径见[内容与小游戏修改地图](docs/engineering/content-editing-guide.md)，实施和验证见[执行记录](docs/engineering/domain-expansion-progress.md)。下方扩展示例仅供后续参考。
+01–04 已完成内部整理，并在原四个展厅内加入适合五六年级的学习活动。本文件描述已实现结构，详细修改路径见[内容与小游戏修改地图](docs/engineering/content-editing-guide.md)，本轮实现、验证及提交见[学习路线实施记录](docs/engineering/upper-primary-learning-progress.md)。下方扩展示例仅供后续参考。
 
 项目使用 TypeScript + Vite 6 + Three.js，没有后端，也没有 React/Vue。01–04 各自拥有视图、内容和交互控制器；应用层负责注册、导航和生命周期。新增展厅不再修改一个几千行的入口文件。
 
@@ -50,6 +50,9 @@ src/
       view.ts                     # 报刊外壳模板
       render.ts                   # 时间线与档案 HTML，从展品数据生成
       controller.ts               # 填充视图、年份点击和滚动定位
+      learning-data.ts            # 5 主题、5 事件、3 匹配题与未来选择
+      learning-state.ts           # 排序、理解确认、Unicode 理由与知识卡条件
+      learning-view.ts            # 学习卡、可拖动/按钮排序、问答与成果
       viewport.css / gallery.css
     explore/                      # 02
       data.ts                     # 系统文案、装配名、分类、任务、动力流程
@@ -61,6 +64,10 @@ src/
       powerflow-state.ts          # 动力故事阶段、时间和播放状态
       vehicle-rig.ts              # 装配、爆炸、开合、灯光和透明度动作
       powerflow-scene.ts          # 动力故事三维效果
+      learning-data.ts / learning-targets.ts # 功能复习、13 项任务与真实/教学目标
+      learning-state.ts / learning-view.ts   # 找目标+功能题、替代学习与结构报告
+      assembly-state.ts          # 四步分组归位，取消恢复与完成门控
+      camera-observation.ts      # 进入前视角/轨道约束快照，取消后精确恢复
       controller.ts               # 拾取、加载、输入和各层接线
       styles.css
     lidar/                        # 03
@@ -76,6 +83,11 @@ src/
       model-rig.ts                # 装配、爆炸、剖视的模型动作
       scan-animation.ts           # 按实验状态更新扫描画面
       controller.ts               # 模型加载、实验接线、UI同步和生命周期
+      learning-data.ts / learning-state.ts   # 设备卡、三轮测距与局限题
+      learning-measurement.ts     # 与显示缩放无关的米制距离和区间
+      learning-camera.ts          # 教学镜头与迟到模型拟合的所有权及恢复
+      learning-world.ts / weather-state.ts   # 四种教学目标与定性天气示意
+      learning-view.ts            # 先判断后揭示、解释与实验记录
       styles.css / exhibit.css
     traffic/                      # 04
       data.ts                     # 8 个情境、答案、反馈、选项排序
@@ -87,6 +99,9 @@ src/
       scenario-scene.ts           # 按情境 ID 设置道具与消费世界状态
       presentation.ts             # 题目、反馈、按钮和结算展示
       controller.ts               # 规则、计时器、运动与展示接线
+      learning-data.ts / learning-view.ts   # 按旧题 ID 关联复习与进阶反馈
+      practice-state.ts           # 五题观察→决策→反馈→总结，独立于旧分数
+      practice-scene.ts           # 独立场景组，退出恢复旧道路与相机
       styles.css
     driving/                      # 旧驾驶小游戏，尚未接入导航
       scene.ts / controller.ts / styles.css / bridge.css
@@ -97,6 +112,7 @@ src/
     three-resources.ts            # 去重释放几何/材质/纹理、实例缓冲、阴影与上下文
     webgl.ts                      # 上下文丢失和章节错误事件
     dom.ts                        # 复用的文本更新函数
+    learning-assessment.ts        # 小型纯单选判定，稳定 ID 和无效选择检查
   styles/
     foundation.css / responsive.css / museum.css / navigation.css
     runtime.css                   # 加载与错误提示
@@ -116,10 +132,10 @@ foundation.css 和 museum.css 保留了早期混合的基础样式，章节专�
 
 | 模块 | 当前组成 | 主要修改文件 |
 | --- | --- | --- |
-| **01 / history** | 14 件新能源车展品、时间线、档案图、滚动定位；目前没有闯关计分 | data.ts 改展品和图片；render/view 改 HTML；controller 改定位交互 |
-| **02 / explore** | 系统聚焦、分类、爆炸拆解、车门/尾门/灯光、动力流程、3 个找部件任务 | data.ts 改装配和任务；mission-state/powerflow-state 改流程；vehicle-rig/powerflow-scene 改动作；mission 改任务面板 |
-| **03 / lidar** | 真实外壳、内部概念零件；整机/爆炸/剖视；4 步扫描；5–80 m 距离实验；720 点模拟点云 | data.ts 改部件与步骤；measurement/experiment-state 改实验规则；model-rig/scan-animation 改动作；concept/scan-scene 改示意与点云 |
-| **04 / traffic** | 8 个情境；自动停车；选择判断；计分；行人通过；自动/手动继续 | data.ts 改题目；rules 改计分与阶段；simulation 改运动；scenario-scene 改道具；presentation 改展示 |
+| **01 / history** | 原 14 展品和时间线；5 主题、排序、3 匹配题、未来表达与知识卡 | data/render 维护原展品；learning-data/state/view 维护新任务 |
+| **02 / explore** | 原聚焦、拆解、开合、动力故事与 3 任务；3 复习题、13 项结构挑战、分组归位 | 原 data/mission/powerflow 保留；learning-targets 维护节点；learning-state/assembly-state 维护挑战 |
+| **03 / lidar** | 原模型/4 步/5–80 m/720 点演示；设备卡、三轮测距、天气与局限实验 | 原 measurement/experiment-state 保留；learning-data/measurement/world/state 与 weather-state 维护新实验 |
+| **04 / traffic** | 原 8 情境/8 分；原题复习、独立五题进阶与安全记录 | 原 data/rules/simulation 保留；learning-data/view 与 practice-state/scene 维护新任务 |
 | **旧 driving** | 三车道避障、能量、自动驾驶、碰撞、重启 | chapters/driving/；需接入生命周期适配后才能注册为新展厅 |
 
 ### 02：找部件小游戏
@@ -224,7 +240,30 @@ HTTP 请求与响应体读取均有 30 秒超时，可随章节销毁取消；GL
 }
 ```
 
-这是供维护者查阅的后续接入示例，当前没有增加05。本轮仅整理现有01–04，不实施学习档案、新课程或05/06。
+这是供维护者查阅的后续接入示例，当前没有增加 05。本轮教学内容进入原 01–04；05/06 需要另外设计。
+
+## 新学习内容的数据流
+
+```mermaid
+flowchart TD
+  A["app runtime · 章节加载与生命周期"] --> H["01 history · 主题 / 排序 / 匹配 / 未来表达"]
+  A --> X["02 explore · 复习 / 13 项结构挑战 / 分组归位"]
+  A --> L["03 lidar · 设备卡 / 三轮测距 / 天气与局限"]
+  A --> T["04 traffic · 八题复习 / 五题进阶"]
+  Q["shared learning-assessment · 按稳定 ID 判单选"] --> H
+  Q --> X
+  Q --> L
+  Q --> T
+  H --> C["各章 controller · 纯状态连接视图/场景"]
+  X --> C
+  L --> C
+  T --> C
+  C --> R["知识卡 / 结构报告 / 实验记录 / 安全记录"]
+```
+
+运行教学文案和答案以各章 `learning-data.ts` 为唯一来源，JSON 准备稿只供参考。题目 ID、选择 ID、模型节点引用是关联键，中文标题可以独立修改。单选判定不管理章节进度；完成、重试与主动继续在各章纯状态模块中处理。
+
+成果在已挂载控制器内存中保存；普通切章后返回保留草稿与成果，刷新、页面退出（包括浏览器缓存返回）或故障重建后重置。原玩法的重置与新任务重置分开。02 的毫米波雷达为明确标注的教学热点，模型失败用图文学习并在报告注明；03 的点云与天气效果是教学示意；04 的进阶掌握数与原 8 分独立。
 
 ## 6. 资源与协作
 

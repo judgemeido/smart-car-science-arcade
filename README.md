@@ -26,18 +26,18 @@ npm run format 格式化源码和测试。部署产物在 dist；图片与模型
 
 | 展厅 | 目录 | 主要修改位置 |
 | --- | --- | --- |
-| 01 发展历史 | src/chapters/history | data.ts 改展品；render.ts 改档案和时间线 HTML |
-| 02 结构展厅 | src/chapters/explore | data.ts 改装配和任务；mission-state/powerflow-state 改流程；vehicle-rig 改动作 |
-| 03 激光雷达 | src/chapters/lidar | data.ts 改部件和步骤；measurement/experiment-state 改计算和状态；scan-animation 改动画 |
-| 04 道路安全 | src/chapters/traffic | data.ts 改题目；rules 改答题计分；simulation/scenario-scene 改运动和道具 |
+| 01 发展历史 | src/chapters/history | data.ts 改展品；learning-data.ts 改主题、排序、匹配和未来选择；learning-state.ts 改任务规则 |
+| 02 结构展厅 | src/chapters/explore | data.ts 改原装配任务；learning-data/learning-targets 改复习和 13 项挑战；assembly-state/vehicle-rig 改分组归位 |
+| 03 激光雷达 | src/chapters/lidar | data.ts 改原部件和步骤；learning-data 改传感器卡与题目；learning-measurement/learning-world/weather-state 改新实验 |
+| 04 道路安全 | src/chapters/traffic | data.ts 改原八题；learning-data 改复习和进阶五题；practice-state/practice-scene 改新阶段与场景 |
 
 完整架构图、小游戏构成和内容修改位置见 [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md)。这些说明是仓库维护文档，网页继续面向最终用户提供四个互动展厅。
 
-四章已分离内容、规则/状态、输入和场景，controller 负责连接。任务推进、雷达实验和答题计分可以独立验证，内容修改路径见 [内容与小游戏修改地图](docs/engineering/content-editing-guide.md)，各章有详细指南。实施范围与验证记录见 [01–04 内部结构整理计划](docs/superpowers/plans/2026-11-08-domain-learning-expansion-plan.md) 和 [执行记录](docs/engineering/domain-expansion-progress.md)。学习底座、05/06 和新课程仍为后续参考。
+四章已分离内容、规则/状态、输入和场景，controller 负责连接。任务推进、雷达实验和答题计分可以独立验证，内容修改路径见 [内容与小游戏修改地图](docs/engineering/content-editing-guide.md)，各章有详细指南。前轮内部整理的记录见 [执行记录](docs/engineering/domain-expansion-progress.md)。本轮新教学内容的实现、验证与逐章 Git 提交见 [学习路线实施记录](docs/engineering/upper-primary-learning-progress.md)。
 
-面向小学五至六年级的 [01–04 教学内容准备稿](docs/content/2026-11-08-upper-primary/README.md) 包含分章文案、小游戏题目、素材缺口与接入说明。四份内容数据目前尚未接入页面，可按章独立审阅和修改。
+面向小学五至六年级的 [01–04 教学内容准备稿](docs/content/2026-11-08-upper-primary/README.md) 保留为内容参考。页面运行内容以各章有类型的 learning-data.ts 为唯一来源；修改题目时同时维护稳定 ID、答案、反馈与章内测试。
 
-根据最新课程材料生成的 [01–04 闯关式学习新 Plan](docs/superpowers/plans/2026-11-08-upper-primary-learning-plan.md) 列出两批实施范围、四章独立任务、资源需求和验收；02 分组归位为可选第三批，05/06 留作后续方向。当前仅生成计划，尚未实施新课程。
+本轮按照 [01–04 闯关式学习 Plan](docs/superpowers/plans/2026-11-08-upper-primary-learning-plan.md) 分章实施，包含 02 分组归位。原浏览、三任务、雷达演示及道路八题/8 分保留；新挑战在原四个展厅内进入。学习草稿与成果仅保存在已挂载控制器内，普通切章保留，刷新、页面退出（包括浏览器缓存返回）或故障重建后重置。05/06 留作后续方向。
 
 四章控制器实现 setActive 与 dispose，DOM 查询限定于章节 host。三维章节按需加载，离开和进入后台时暂停，资源和绘图故障在本章内恢复。旧驾驶小游戏在 src/chapters/driving，当前未注册。
 

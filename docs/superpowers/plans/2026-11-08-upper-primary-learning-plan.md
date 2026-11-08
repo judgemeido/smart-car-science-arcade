@@ -10,7 +10,7 @@
 
 **Spec:** [01–04 闯关式学习内容设计](../specs/2026-11-08-upper-primary-learning-design.md)。
 
-**Status:** 草案，尚未实施。日期：2026-11-08。当前代码已经完成内部整理；所有复选框只在新任务实际实现和验证后勾选。
+**Status:** 2026-11-08 已按 01–04 并行实施并逐章保存 Git，包含 02 分组归位。最终完整检查通过：191 单元、构建、69 浏览器，最终复审 APPROVE。实际证据与提交见 [实施记录](../../engineering/upper-primary-learning-progress.md)。
 
 ## Global Constraints
 
@@ -27,7 +27,7 @@
 - 成果保存在当前已挂载控制器的内存中；普通切章保留，刷新、控制器重建或页面退出后重置。本期不承诺持久保存。
 - 原 8 分与扩展完成反馈分开展示；本期不加入 100 分、首答计分、连续奖励和章节门禁。
 - 学生界面只出现学习内容、操作与必要示意说明；开发说明留仓库。
-- 本次只产出 Plan。工作区已有未提交代码与资源必须保留；不自动提交、推送、安装或发布。
+- 开工前保存已有非忽略代码与资源；完成一章后由集成负责人单独暂存、验证和本地提交。章节代理不操作 Git 索引；不推送、安装或发布。
 
 ## Review Focus
 
@@ -56,8 +56,8 @@
 | --- | --- | --- |
 | 集成 | `src/shared/learning-assessment.ts`；对应单元测试 | 根 README、PROJECT_ARCHITECTURE、内容维护索引；必要时公共接线 |
 | 01 | `history/learning-data.ts`、`learning-state.ts`、`learning-view.ts` | history/controller、view、gallery.css；history 指南 |
-| 02 | `explore/learning-data.ts`、`learning-targets.ts`、`learning-state.ts`、`learning-view.ts`；可选 `assembly-state.ts` | explore/controller、data、styles；可选 vehicle-rig；explore 指南 |
-| 03 | `lidar/learning-data.ts`、`learning-measurement.ts`、`learning-state.ts`、`learning-world.ts`、`learning-view.ts`、`weather-state.ts` | lidar/controller、view、styles；lidar 指南 |
+| 02 | `explore/learning-data.ts`、`learning-targets.ts`、`learning-state.ts`、`learning-view.ts`、`camera-observation.ts`；本次包含 `assembly-state.ts` | explore/controller、data、styles、vehicle-rig；explore 指南 |
+| 03 | `lidar/learning-data.ts`、`learning-measurement.ts`、`learning-state.ts`、`learning-world.ts`、`learning-view.ts`、`weather-state.ts`、`learning-camera.ts` | lidar/controller、data、view、styles；lidar 指南 |
 | 04 | `traffic/learning-data.ts`、`learning-view.ts`、`practice-state.ts`、`practice-scene.ts` | traffic/controller、view、styles；traffic 指南 |
 
 章内源码路径均以 `src/chapters/` 为前缀；精确测试与接口见各子计划。旧 data/rules/measurement/simulation 继续负责旧流程；新增文件只承担已有内容所需职责。S0 不建设注册表、事件总线或游戏框架。
@@ -78,7 +78,7 @@ flowchart TD
     X --> O["P3 可选 X3 分组归位"]
 ```
 
-先完成四章 P1，再逐章完成 P2；图中的箭头表示依赖，不要求四章同时上线。01/02/03/04 使用独立文件和测试，可分别实施和审阅。需要并行协作时，集成负责人负责公共文件，章节负责人只改所属章；四个并发槽位包括集成负责人，最多同时三个章节任务。本文不启动代理。
+用户已授权按章并行实施，各章内部按 P1→P2（02 包含 P3）顺序推进；图中的箭头表示依赖。01/02/03/04 使用独立文件和测试，分别实施和审阅。集成负责人负责公共文件及 Git，章节负责人只改所属章；四个并发槽位包括集成负责人，最多同时三个章节任务。
 
 | 独立工作包 | 子计划 | 完成标志 |
 | --- | --- | --- |
@@ -93,9 +93,9 @@ flowchart TD
 
 **Interfaces:** 原 `ChapterController.setActive(active: boolean): void` 与 `dispose(): void`；本任务不生产新运行接口。
 
-- [ ] 运行 `npm run check`，记录当时实际结果、工作区改动与四章截图；旧记录的 98 单元/23 浏览器仅作参考。
-- [ ] 登记材料与内容包版本、原任务/题目/时间参数、模型节点和许可；确认没有新旧 Plan 同时安排重做内部拆分。
-- [ ] 在进度记录中登记 S0 与 H/X/L/T 的所有权和待验证项；只保存必要基线，不恢复旧快照覆盖当前文件。
+- [x] 运行 `npm run check`，记录当时实际结果、工作区改动与四章截图；基线为 98 单元、构建、23 浏览器通过。自动服务收尾挂起后以独立预览取得浏览器退出 0，未隐藏测试失败。
+- [x] 登记材料与内容包版本、原任务/题目/时间参数、模型节点和许可；确认没有新旧 Plan 同时安排重做内部拆分。
+- [x] 在进度记录中登记 S0 与 H/X/L/T 的所有权和待验证项；只保存必要基线，不恢复旧快照覆盖当前文件。
 
 ## Task S0：共用纯单选判断
 
@@ -103,10 +103,10 @@ flowchart TD
 
 **Interfaces:** Produces `ChoiceQuestion`（`id/prompt/choices[{id,label}]/correctChoiceId/correctFeedback/retryFeedback`）、`ChoiceVerdict = 'correct' | 'incorrect' | 'invalid'`，以及 `evaluateChoice(question: ChoiceQuestion, choiceId: string): ChoiceVerdict`。四章只消费该接口，提交/重试/完成规则仍在各章。
 
-- [ ] 写失败测试：对同一道题断言 `expect(evaluateChoice(q, q.correctChoiceId)).toBe('correct')`、错误选项为 `'incorrect'`、未知 ID 为 `'invalid'`，交换选项顺序后结果不变。
-- [ ] 运行 `npm run test:unit -- tests/unit/learning-assessment.test.ts`，确认接口未实现导致测试失败。
-- [ ] 实现上面的类型和函数；无 DOM/Three 依赖，不从按钮位置或 `data-correct` 判断。
-- [ ] 重跑同一命令，确认全部通过；按接口交付四章，记录结果。本轮不自动提交。
+- [x] 写失败测试：对同一道题断言 `expect(evaluateChoice(q, q.correctChoiceId)).toBe('correct')`、错误选项为 `'incorrect'`、未知 ID 为 `'invalid'`，交换选项顺序后结果不变。
+- [x] 运行 `npm run test:unit -- tests/unit/learning-assessment.test.ts`，确认接口未实现导致测试失败。
+- [x] 实现上面的类型和函数；无 DOM/Three 依赖，不从按钮位置或 `data-correct` 判断。
+- [x] 重跑同一命令，确认全部通过；按接口交付四章，记录结果并由集成负责人保存公共基础提交 `0b6fff7`。
 
 ## Task A5：联调、回归与维护交付
 
@@ -114,11 +114,11 @@ flowchart TD
 
 **Interfaces:** 消费四章原 mount/生命周期和各子计划产出的学习接口；不添加全局成绩服务或 ChapterContext。
 
-- [ ] 写路线测试：普通切章再返回保留未提交理由和任务结果；刷新后为新学习状态；原 04 分数不受进阶题影响；失败/重试不重复登记成果。
-- [ ] 构建后执行 `npm run test:e2e -- tests/e2e/learning-route.spec.ts`；对四章新入口分别验证 1440×900 和 390×844 布局，键盘、触屏、文字可读与焦点恢复。
-- [ ] 按四章子计划完成原玩法回归，保留已有模型失败、迟到加载、后台暂停、WebGL 恢复和资源清理测试；新动画退出后无残留。
-- [ ] 运行 `npm run check`，必须取得新代码的完整通过结果；失败回到责任章节定位，不靠减少既有断言解决。
-- [ ] 更新真实架构、题目修改位置、内容唯一来源、成果生命周期和许可记录；说明哪些 P2/P3 尚未完成，不把计划勾选当作实现证据。
+- [x] 写路线测试：普通切章再返回保留未提交理由和任务结果；刷新后为新学习状态；原 04 分数不受进阶题影响；失败/重试不重复登记成果。
+- [x] 构建后执行 `npm run test:e2e -- tests/e2e/learning-route.spec.ts`；11 个用例通过，对四章新入口分别验证 1440×900 和 390×844 布局，键盘、触屏、文字可读与焦点恢复。
+- [x] 按四章子计划完成原玩法回归，保留已有模型失败、迟到加载、后台暂停、WebGL 恢复和资源清理测试；新动画退出后无残留。
+- [x] 运行 `npm run check`，取得 191 单元、构建和 69 浏览器全部通过的完整结果（退出 0）；初次相机断言失败已定位并通过真实回归修正，未减少既有行为断言。
+- [x] 更新真实架构、题目修改位置、内容唯一来源、成果生命周期和许可记录；本期包含四章 P1/P2 和 02 P3，最终整体验收仍以实际通过结果和提交为准。
 
 ## 4. 后续方向与本期接口关系
 
@@ -126,12 +126,12 @@ flowchart TD
 
 ## 5. 本 Plan 的审阅与执行状态
 
-本稿已按最新材料列出内容取舍、真实接入位置、四章任务、依赖与验收。仍是待审阅的实施计划，不代表设计已获实施批准或任一功能已完成。建议先执行 S0 和四章 P1，拿到学生可体验的一批结果，再执行 P2；P3 可以后置。
+用户已授权执行四章并行实施、包含 02 分组归位，并在每章完成后保存本地 Git。独立实现、审查、浏览器验证和 Git 保存的实际状态分别记录在实施记录中；复选框表示验证过的任务，不代替提交 SHA。
 
-用户此前希望按 01–04 分开协作，这里保留该拆分方式。实际启动实施时再选择按章协作或同一负责人顺序执行；不因本次请求生成 Plan 而开始修改产品。
+本轮按 01–04 分开协作，公共接口、Git、构建与浏览器验收由集成负责人统一处理。受四个并发槽位限制，先派出 01/02/03，空出槽位后启动 04；四章代码、最终相机交接修正和完整验收均已完成，实际证据见实施记录。05/06 未纳入。
 
 ## 6. 计划自检记录
 
-2026-11-08 已对设计稿、总 Plan 与四份子计划进行自检：23 个链接及章节锚点有效，25 处现有文件路径存在；19 个建议新增源码文件尚未创建，85 个实施/验收复选项保持未完成。内容包仍包含 26 道单选题，02 的 13 项、03 的 3 轮和 04 的原 8 题/新增 5 题与计划一致。
+2026-11-08 编制计划时对设计稿、总 Plan 与四份子计划进行了自检：23 个链接及章节锚点有效，25 处现有文件路径存在；当时 19 个建议新增源码文件尚未创建，85 个实施/验收复选项未完成。内容包包含 26 道单选题，02 的 13 项、03 的 3 轮和 04 的原 8 题/新增 5 题与计划一致。这些是编制时记录，当前实现及验证以实施记录和已勾选项目为准。
 
 已核对全局约束逐条覆盖、章节文件所有权、任务依赖、接口名称、重复操作与降级测试归属。该结果是计划和内容关联校验，不代表未来单元/浏览器测试已经通过；产品检查安排在 A0 与 A5 实际执行。

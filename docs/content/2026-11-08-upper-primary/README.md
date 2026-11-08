@@ -1,6 +1,6 @@
 # 01–04 教学内容准备稿：小学五至六年级
 
-这份内容包依据用户原课程建议和当前代码编写，供审阅、修改及后续接入。四章仍面向学生，沿用现有展厅和主要操作。当前交付的是内容准备稿：四份 JSON 尚未被产品导入，页面、原成绩和小游戏流程尚未因本内容包而改变。
+这份内容包依据用户原课程建议和当前代码编写，作为准备稿与内容参考保留。四章仍面向学生，沿用现有展厅和主要操作。本轮已按章转换到有类型的 `src/chapters/*/learning-data.ts`，运行时不导入本目录 JSON；维护正在运行的文案、答案和任务时，以各章源码为唯一来源，实际验证及 Git 保存状态见 [实施记录](../../engineering/upper-primary-learning-progress.md)。
 
 ## 阅读和修改入口
 
@@ -24,7 +24,7 @@ flowchart LR
     D --> H["道路安全观察记录"]
 ```
 
-成果卡目前只定义字段。卡片页面、完成状态及保存功能仍需接入，准备稿没有建立跨章节存档。
+各章成果卡与完成状态由章内规则生成。草稿与成果保存在已挂载控制器内存中，普通切章保留，刷新、页面退出或故障重建后重置；本期没有跨章节持久存档。
 
 ## 教学定位
 
@@ -65,7 +65,7 @@ flowchart LR
 - 对应光往返时间约为 133.4 ns、400.3 ns；引导问题是“目标更远时，往返时间怎样变化？”
 - 接入 6 张传感器卡，区分接收图像、测距离、近处探测和卫星定位。
 
-当前点云是 720 点教学示意，四类道路目标及目标识别尚未实现。界面不能把示意动画标成真实环境测量或实际识别结果。
+原点云是 720 点教学示意；本轮新增四类道路目标的教学几何与对应点云，不提供真实算法识别。界面将两种演示都标为教学示意。
 
 ### 04：跑完原八题，再回看理由
 
@@ -95,27 +95,29 @@ flowchart LR
 
 ## 四章接入位置与维护方式
 
-当前内容包独立放在 `docs/content/`。后续确认内容后，转为各章有类型的 `learning-data.ts`；不把所有题目塞进入口文件。
+本目录 JSON 保留准备时的内容和接入建议。当前页面已使用各章有类型的 `learning-data.ts`，修改正在运行的题目请查下表和各章开发指南。
 
-| 章节 | 现有代码位置 | 后续新增文件建议 | 责任边界 |
+| 章节 | 原玩法代码位置 | 已接入的内容文件 | 责任边界 |
 | --- | --- | --- | --- |
-| **01** | [data.ts](../../../src/chapters/history/data.ts)、[render.ts](../../../src/chapters/history/render.ts)、[view.ts](../../../src/chapters/history/view.ts)、[controller.ts](../../../src/chapters/history/controller.ts) | `src/chapters/history/learning-data.ts`（未创建） | 展品资料与教学题分开；显示层呈现题目；控制层处理提交与重试 |
-| **02** | [data.ts](../../../src/chapters/explore/data.ts)、[mission-state.ts](../../../src/chapters/explore/mission-state.ts)、[mission.ts](../../../src/chapters/explore/mission.ts)、[vehicle-rig.ts](../../../src/chapters/explore/vehicle-rig.ts)、[controller.ts](../../../src/chapters/explore/controller.ts) | `src/chapters/explore/learning-data.ts`、`learning-targets.ts`（均未创建） | 教学文案与模型目标映射分开；命中规则独立判断；模型层只处理可视化与拾取 |
-| **03** | [data.ts](../../../src/chapters/lidar/data.ts)、[measurement.ts](../../../src/chapters/lidar/measurement.ts)、[experiment-state.ts](../../../src/chapters/lidar/experiment-state.ts)、[scan-scene.ts](../../../src/chapters/lidar/scan-scene.ts)、[scan-animation.ts](../../../src/chapters/lidar/scan-animation.ts)、[controller.ts](../../../src/chapters/lidar/controller.ts) | `src/chapters/lidar/learning-data.ts`（未创建） | 题目与环境说明是内容；距离计算保持纯函数；动画读取实验状态 |
-| **04** | [data.ts](../../../src/chapters/traffic/data.ts)、[rules.ts](../../../src/chapters/traffic/rules.ts)、[simulation.ts](../../../src/chapters/traffic/simulation.ts)、[scenario-scene.ts](../../../src/chapters/traffic/scenario-scene.ts)、[presentation.ts](../../../src/chapters/traffic/presentation.ts)、[controller.ts](../../../src/chapters/traffic/controller.ts) | `src/chapters/traffic/learning-data.ts`（未创建） | 原题答案仍由原数据维护；复习用 ID 引用；规则、模拟、场景和反馈各自负责 |
+| **01** | [data.ts](../../../src/chapters/history/data.ts)、[render.ts](../../../src/chapters/history/render.ts)、[view.ts](../../../src/chapters/history/view.ts)、[controller.ts](../../../src/chapters/history/controller.ts) | [learning-data.ts](../../../src/chapters/history/learning-data.ts) | 展品资料与教学题分开；显示层呈现题目；控制层处理提交与重试 |
+| **02** | [data.ts](../../../src/chapters/explore/data.ts)、[mission-state.ts](../../../src/chapters/explore/mission-state.ts)、[mission.ts](../../../src/chapters/explore/mission.ts)、[vehicle-rig.ts](../../../src/chapters/explore/vehicle-rig.ts)、[controller.ts](../../../src/chapters/explore/controller.ts) | [learning-data.ts](../../../src/chapters/explore/learning-data.ts)、[learning-targets.ts](../../../src/chapters/explore/learning-targets.ts) | 教学文案与模型目标映射分开；命中规则独立判断；模型层只处理可视化与拾取 |
+| **03** | [data.ts](../../../src/chapters/lidar/data.ts)、[measurement.ts](../../../src/chapters/lidar/measurement.ts)、[experiment-state.ts](../../../src/chapters/lidar/experiment-state.ts)、[scan-scene.ts](../../../src/chapters/lidar/scan-scene.ts)、[scan-animation.ts](../../../src/chapters/lidar/scan-animation.ts)、[controller.ts](../../../src/chapters/lidar/controller.ts) | [learning-data.ts](../../../src/chapters/lidar/learning-data.ts) | 题目与环境说明是内容；距离计算保持纯函数；动画读取实验状态 |
+| **04** | [data.ts](../../../src/chapters/traffic/data.ts)、[rules.ts](../../../src/chapters/traffic/rules.ts)、[simulation.ts](../../../src/chapters/traffic/simulation.ts)、[scenario-scene.ts](../../../src/chapters/traffic/scenario-scene.ts)、[presentation.ts](../../../src/chapters/traffic/presentation.ts)、[controller.ts](../../../src/chapters/traffic/controller.ts) | [learning-data.ts](../../../src/chapters/traffic/learning-data.ts) | 原题答案仍由原数据维护；复习用 ID 引用；规则、模拟、场景和反馈各自负责 |
 
 后续改引导词，修改 `studentCopy`；改题干与选项，修改题目对象；改部件命中，修改 02 的目标映射；改距离挑战，修改 03 轮次与判定；改道路题先核对 04 的场景假设与场景配置。题目增加时新增稳定 ID，文案修改时保留 ID。新内容继续归属所在章节，学生页面只出现课程与活动。
 
 ## 模型、素材与科学表述
 
-- 已有车辆模型：[yaojing-s9-optimized.glb](../../../public/assets/yaojing-s9-optimized.glb)。电机、传动、摄像头、激光与超声目标按真实命名节点关联。当前拾取最终提升为 `EV_SUV` 顶层装配，子节点存在不等于已能作为独立小游戏目标。
-- 模型中未找到独立命名的毫米波雷达节点，02 将它列为待新增 `teaching-millimeter-radar` 教学热点；应明确标注示意，不据此宣称真实车型配置。
+- 已有车辆模型：[yaojing-s9-optimized.glb](../../../public/assets/yaojing-s9-optimized.glb)。电机、传动、摄像头、激光与超声目标按真实命名节点关联。原拾取提升为 `EV_SUV` 顶层装配，新挑战独立查找最近允许的目标祖先；添加目标时仍须核对真实节点。
+- 模型中未找到独立命名的毫米波雷达节点，02 已接入 `teaching-millimeter-radar` 教学热点并标注示意；不据此宣称真实车型配置。
 - 03 雨雾效果只用于定性对比，不给出虚构的车型识别率、固定退化比例或真实制动性能。
 - 摄像头接收图像；激光雷达和毫米波雷达主动探测；GNSS 接收卫星信号帮助定位，不能靠定位识别行人。
 - 多传感器可以补充信息，设备数量不能保证绝对安全。纯电动车行驶无尾气，也不能概括为全生命周期没有环境影响。
 - 01 未来任务本批沿用现有未来展品与文字；新增图片或模型需记录来源、许可与示意属性。现有资源许可见 [THIRD_PARTY_NOTICES.md](../../../THIRD_PARTY_NOTICES.md)。
 
 ## 接入验收清单
+
+以下是准备稿保留的原始验收建议，不作为当前实现状态。实际代码、输入、生命周期与回归检查已通过，见 [实施记录](../../engineering/upper-primary-learning-progress.md)；学生课堂试用尚未开展。
 
 - [ ] 五六年级学生能从题面理解任务；必要术语有释义，说明不依赖教师解释隐藏条件。
 - [ ] 原导航、自由观察、原三任务、雷达原理演示、道路原八题可完整使用。
