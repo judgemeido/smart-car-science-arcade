@@ -19,6 +19,6 @@ export default defineConfig({
   webServer: {
     command: `npm run preview -- --host 127.0.0.1 --port ${port} --strictPort`,
     url: baseURL,
-    reuseExistingServer: !process.env.CI && !process.env.PLAYWRIGHT_PORT && !process.env.PLAYWRIGHT_BASE_URL,
+    reuseExistingServer: process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === '1',
   },
 });

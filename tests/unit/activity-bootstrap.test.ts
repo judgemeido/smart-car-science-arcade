@@ -23,7 +23,7 @@ class NodeBoundary extends EventTarget {
   focus() {}
 }
 
-function fixture(hidden = false) {
+function fixture(hidden = false, activityId: ActivityDefinition['activityId'] = 'history-lab') {
   const windowTarget = new EventTarget();
   const documentTarget = Object.assign(new EventTarget(), {
     visibilityState: hidden ? 'hidden' : 'visible',
@@ -45,7 +45,7 @@ function fixture(hidden = false) {
   });
   const runs: { active: boolean; disposed: number; node: string }[] = [];
   const definition: ActivityDefinition = {
-    activityId: 'topicgame',
+    activityId,
     title: '历史闯关',
     galleryHref: '/index.html#history',
     view: '<p>准备开始</p>',
@@ -64,7 +64,7 @@ function fixture(hidden = false) {
     },
   };
   const app = bootstrapActivity(root as unknown as HTMLElement, definition);
-  return { app, runs, host, documentTarget, windowTarget };
+  return { app, runs, host, root, documentTarget, windowTarget };
 }
 
 const cleanups: (() => void)[] = [];
@@ -117,4 +117,17 @@ it('direct disposal removes all lifecycle listeners and is idempotent', () => {
   windowTarget.dispatchEvent(transition('pagehide', true));
   windowTarget.dispatchEvent(transition('pageshow', true));
   expect(runs).toEqual([{ active: false, disposed: 1, node: '<p>准备开始</p>' }]);
+});
+
+it.each([
+  ['history-lab', 'topicgame'],
+  ['structure-lab', 'structuregame'],
+  ['sensor-lab', 'sensorgame'],
+] as const)('keeps %s business identity while selecting the %s navigation item', (activityId, itemId) => {
+  const { app, root } = fixture(false, activityId);
+  cleanups.push(app.dispose);
+  expect(root.innerHTML).toContain(`data-activity="${activityId}"`);
+  const currentLinks = [...root.innerHTML.matchAll(/<a\b[^>]*aria-current="page"[^>]*>/g)];
+  expect(currentLinks).toHaveLength(1);
+  expect(currentLinks[0][0]).toContain(`data-navigation-item="${itemId}"`);
 });

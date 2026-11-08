@@ -6,25 +6,25 @@ export const navigationItems = [
     title: '发展历史',
     items: [
       { id: 'history', title: '参观历史展厅', path: 'index.html#history', gallery: true },
-      { id: 'topicgame', title: '历史闯关', path: 'games/history/index.html', gallery: false },
+      { id: 'topicgame', title: '主题卡', path: 'games/history/index.html', gallery: false },
     ],
   },
   {
     id: 'explore',
     number: '02',
-    title: '车辆结构',
+    title: '结构展厅',
     items: [
       { id: 'explore', title: '参观结构展厅', path: 'index.html#explore', gallery: true },
-      { id: 'structuregame', title: '结构闯关', path: 'games/structure/index.html', gallery: false },
+      { id: 'structuregame', title: '结构挑战', path: 'games/structure/index.html', gallery: false },
     ],
   },
   {
     id: 'lidar',
     number: '03',
-    title: '智能感知',
+    title: '激光雷达',
     items: [
       { id: 'lidar', title: '参观雷达展厅', path: 'index.html#lidar', gallery: true },
-      { id: 'sensorgame', title: '感知闯关', path: 'games/sensor/index.html', gallery: false },
+      { id: 'sensorgame', title: '传感器实验室', path: 'games/sensor/index.html', gallery: false },
     ],
   },
   {
@@ -37,10 +37,34 @@ export const navigationItems = [
 
 export type NavigationItemId = (typeof navigationItems)[number]['items'][number]['id'];
 
-export function navigationHref(id: string, base = import.meta.env.BASE_URL): string {
+export type GameActivityId = 'history-lab' | 'structure-lab' | 'sensor-lab';
+export const activityNavigationItems = {
+  'history-lab': 'topicgame',
+  'structure-lab': 'structuregame',
+  'sensor-lab': 'sensorgame',
+} as const satisfies Record<GameActivityId, NavigationItemId>;
+
+function relativeDeploymentBase(pathname: string): string {
+  for (const group of navigationItems) {
+    for (const item of group.items) {
+      if (item.gallery) continue;
+      for (const entryPath of [item.path, item.path.replace(/index\.html$/, '')]) {
+        if (pathname.endsWith(`/${entryPath}`)) return pathname.slice(0, -entryPath.length);
+      }
+    }
+  }
+  return pathname.endsWith('/') ? pathname : pathname.slice(0, pathname.lastIndexOf('/') + 1);
+}
+
+export function navigationHref(
+  id: string,
+  base = import.meta.env.BASE_URL,
+  currentPathname = typeof location === 'undefined' ? '/' : location.pathname,
+): string {
   const item = navigationItems.flatMap((group) => [...group.items]).find((item) => item.id === id);
   if (!item) throw new Error(`Unknown navigation destination: ${id}`);
-  return `${base.endsWith('/') ? base : `${base}/`}${item.path}`;
+  const prefix = base === './' || base === '' ? relativeDeploymentBase(currentPathname) : base;
+  return `${prefix.endsWith('/') ? prefix : `${prefix}/`}${item.path}`;
 }
 
 export function resolveNavigationItem(pathname: string, hash: string): NavigationItemId {

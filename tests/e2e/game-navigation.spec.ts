@@ -14,6 +14,12 @@ test('four accordion groups offer seven native destinations and preserve gallery
   await expect(menu.locator('a')).toHaveCount(7);
   await expect(page.locator('[data-chapter-total]')).toHaveText('04');
   await openMenu(page);
+  await expect(menu.locator('[data-group-toggle="history"]')).toContainText('发展历史');
+  await expect(menu.locator('[data-group-toggle="explore"]')).toContainText('结构展厅');
+  await expect(menu.locator('[data-group-toggle="lidar"]')).toContainText('激光雷达');
+  await expect(menu.locator('a[data-navigation-item="topicgame"]')).toHaveText('主题卡');
+  await expect(menu.locator('a[data-navigation-item="structuregame"]')).toHaveText('结构挑战');
+  await expect(menu.locator('a[data-navigation-item="sensorgame"]')).toHaveText('传感器实验室');
   await expect(menu.locator('a[aria-current="page"]')).toHaveAttribute('data-navigation-item', 'history');
   await expect(menu.locator('[data-group-toggle="history"]')).toHaveAttribute('aria-expanded', 'true');
   await menu.locator('[data-group-toggle="lidar"]').click();
@@ -25,10 +31,10 @@ test('four accordion groups offer seven native destinations and preserve gallery
   await expect(page.locator('[data-page="history"]')).toHaveClass(/is-active/);
 });
 
-for (const [chapter, activity, path] of [
-  ['history', 'topicgame', 'history'],
-  ['explore', 'structuregame', 'structure'],
-  ['lidar', 'sensorgame', 'sensor'],
+for (const [chapter, activity, path, businessId] of [
+  ['history', 'topicgame', 'history', 'history-lab'],
+  ['explore', 'structuregame', 'structure', 'structure-lab'],
+  ['lidar', 'sensorgame', 'sensor', 'sensor-lab'],
 ] as const) {
   test(`${activity} navigates to its own document and refreshes without gallery/3D hosts`, async ({
     page,
@@ -42,7 +48,7 @@ for (const [chapter, activity, path] of [
     await page.reload();
     await expect(page.locator('main')).toHaveCount(1);
     await expect(page.locator('[data-activity-host]')).toHaveCount(1);
-    await expect(page.locator('[data-activity-host]')).toHaveAttribute('data-activity', activity);
+    await expect(page.locator('[data-activity-host]')).toHaveAttribute('data-activity', businessId);
     await expect(
       page.locator('[data-page], .model-viewer, [data-model-canvas], [data-lidar-canvas]'),
     ).toHaveCount(0);
