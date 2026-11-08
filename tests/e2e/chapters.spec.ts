@@ -1,7 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function navigate(page: Page, id: string, status = 'ready') {
-  if (await page.locator('[data-menu-button]').isVisible()) await page.locator('[data-menu-button]').click();
+  if ((await page.locator('[data-menu-button]').getAttribute('aria-expanded')) !== 'true')
+    await page.locator('[data-menu-button]').click();
+  const group = page.locator(`[data-group-toggle="${id}"]`);
+  if ((await group.getAttribute('aria-expanded')) !== 'true') await group.click();
   await page.locator(`[data-go="${id}"]`).click();
   await expect(page.locator(`[data-page="${id}"]`)).toHaveAttribute('data-status', status);
 }
@@ -46,12 +49,13 @@ test('hidden chapters and background pages stop making WebGL draw calls', async 
   expect(await counts()).toEqual(allPaused);
 });
 
-test('mobile chapter tabs navigate 03 and 01 with a single active chapter', async ({ page }) => {
+test('mobile chapter accordion navigates 03 and 01 with a single active chapter', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/#history');
   await expect(page.locator('[data-chapter-total]')).toHaveText('04');
+  await page.locator('[data-menu-button]').click();
   for (const id of ['history', 'explore', 'lidar', 'traffic']) {
-    await expect(page.locator(`[data-go="${id}"]`)).toBeVisible();
+    await expect(page.locator(`[data-group-toggle="${id}"]`)).toBeVisible();
   }
   await navigate(page, 'lidar');
   await expect(page.locator('[data-chapter-number]')).toHaveText('03');
@@ -61,7 +65,7 @@ test('mobile chapter tabs navigate 03 and 01 with a single active chapter', asyn
   await expect(page.locator('[data-chapter-number]')).toHaveText('01');
   await expect(page.locator('[data-page="lidar"]')).toHaveAttribute('aria-hidden', 'true');
   await expect(page.locator('[data-page].is-active')).toHaveCount(1);
-  await page.locator('[data-go="history"]').click();
+  await navigate(page, 'history');
   await expect(page.locator('[data-menu-button]')).toHaveAttribute('aria-expanded', 'false');
   await expect(page.locator('[data-chapter-menu]')).not.toHaveClass(/is-open/);
 });

@@ -3,6 +3,12 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   build: {
     rollupOptions: {
+      input: {
+        gallery: 'index.html',
+        historyGame: 'games/history/index.html',
+        structureGame: 'games/structure/index.html',
+        sensorGame: 'games/sensor/index.html',
+      },
       output: {
         // Split at Three's existing core/renderer boundary; keep it out of the history entry.
         manualChunks(id) {

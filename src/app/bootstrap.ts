@@ -4,19 +4,18 @@ import { renderShell } from './shell';
 import { resolveChapter } from './navigation';
 import { createChapterRuntime, type ChapterStatus } from './runtime';
 import { createScope } from '../shared/lifecycle';
+import { mountChapterNavigation } from '../ui/chapter-navigation';
 
 export function bootstrap(root: HTMLElement, chapters: readonly ChapterDefinition[] = registeredChapters) {
   const scope = createScope();
   const hosts = renderShell(root, chapters);
   const ids = chapters.map((chapter) => chapter.id);
-  const menu = root.querySelector<HTMLElement>('[data-chapter-menu]')!;
-  const menuButton = root.querySelector<HTMLButtonElement>('[data-menu-button]')!;
+  const navigation = mountChapterNavigation(root, ids[0]);
+  scope.add(navigation.dispose);
   let current = '';
 
   function closeMenu() {
-    menu.classList.remove('is-open');
-    menuButton.classList.remove('is-open');
-    menuButton.setAttribute('aria-expanded', 'false');
+    navigation.close();
   }
 
   function showStatus(id: string, status: ChapterStatus, error?: unknown) {
@@ -77,11 +76,7 @@ export function bootstrap(root: HTMLElement, chapters: readonly ChapterDefinitio
     }
     for (const target of [document.documentElement, document.body])
       target.classList.toggle('page-immersive', chapter.immersive);
-    root.querySelectorAll<HTMLElement>('[data-go]').forEach((item) => {
-      item.classList.toggle('is-active', item.dataset.go === id);
-      if (item.dataset.go === id) item.setAttribute('aria-current', 'page');
-      else item.removeAttribute('aria-current');
-    });
+    navigation.setCurrent(id);
     root.querySelector('[data-chapter-number]')!.textContent = chapter.number;
     root.querySelector('[data-chapter-label]')!.textContent = chapter.label;
     closeMenu();
@@ -92,15 +87,9 @@ export function bootstrap(root: HTMLElement, chapters: readonly ChapterDefinitio
   scope.listen(root, 'click', (event: MouseEvent) => {
     if (!(event.target instanceof Element)) return;
     const button = event.target.closest<HTMLElement>(
-      '[data-go], [data-next], [data-chapter-home], [data-chapter-retry], [data-menu-button]',
+      '[data-go], [data-next], [data-chapter-home], [data-chapter-retry]',
     );
     if (!button || !root.contains(button)) return;
-    if (button.hasAttribute('data-menu-button')) {
-      const open = menu.classList.toggle('is-open');
-      menuButton.classList.toggle('is-open', open);
-      menuButton.setAttribute('aria-expanded', String(open));
-      return;
-    }
     if (button.dataset.chapterRetry) {
       if (button.dataset.reload === 'true') {
         location.reload();
@@ -128,9 +117,6 @@ export function bootstrap(root: HTMLElement, chapters: readonly ChapterDefinitio
     else dispose();
   });
   scope.listen(window, 'pageshow', () => runtime.setVisible(document.visibilityState !== 'hidden'));
-  scope.listen(window, 'keydown', (event: KeyboardEvent) => {
-    if (event.key === 'Escape') closeMenu();
-  });
   scope.listen(root, 'chapter:error', (event: CustomEvent<unknown>) => {
     const host = (event.target as Element).closest<HTMLElement>('[data-page]');
     if (host?.dataset.page) runtime.fail(host.dataset.page, event.detail);
