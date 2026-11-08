@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">比亚迪闪充网络扩展科普图</title>
+  <desc id="desc">以中国地图的抽象轮廓展示闪充站覆盖城市与连接道路的网络</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f3f0e8"/><stop offset="1" stop-color="#d8d9d2"/></linearGradient>
+    <linearGradient id="map" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eee9dc"/><stop offset="1" stop-color="#c9d1c9"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#29302c" flood-opacity=".15"/></filter>
+  </defs>
+  <rect width="1200" height="720" fill="url(#paper)"/>
+  <path d="M0 0H16V720H0Z" fill="#b9342a"/>
+  <text x="62" y="78" fill="#a23a31" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="18" letter-spacing="5">中国智造 · 补能网络</text>
+  <text x="62" y="138" fill="#292c2a" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="38" font-weight="700">闪充站，连接更多城市</text>
+  <text x="64" y="174" fill="#626761" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="17">从一座座站点，织成更大的出行网络</text>
+  <g filter="url(#shadow)">
+    <path d="m108 310 52-55 56-9 45-41 53 12 49-29 49 21 34-12 55 40 49 4 36 45 42 16-8 48-34 28-6 43-40 24-22 53-42 9-26 41-46-16-41 11-42-34-53 8-28-20-55 2-35-37-36-6-10-43-35-24 20-34Z" fill="url(#map)" stroke="#9ca7a0" stroke-width="3"/>
+    <path d="m560 490 21 6 15 20-17 18-19-10-7-17Z" fill="#d9d8ce" stroke="#aeb2a9" stroke-width="2"/>
+  </g>
+  <g fill="none" stroke="#bd4638" stroke-width="2.5" opacity=".7">
+    <path d="M179 305 280 334 354 292 420 345 493 318"/><path d="M280 334 293 406 369 390 420 345"/>
+    <path d="M354 292 370 235 433 266 493 318 461 375 420 345"/><path d="M369 390 461 375 493 318"/>
+  </g>
+  <g fill="#b9342a" stroke="#fff5e6" stroke-width="4">
+    <circle cx="179" cy="305" r="10"/><circle cx="280" cy="334" r="10"/><circle cx="354" cy="292" r="10"/>
+    <circle cx="420" cy="345" r="10"/><circle cx="493" cy="318" r="10"/><circle cx="293" cy="406" r="10"/>
+    <circle cx="369" cy="390" r="10"/><circle cx="370" cy="235" r="10"/><circle cx="433" cy="266" r="10"/><circle cx="461" cy="375" r="10"/>
+  </g>
+  <g fill="#4e5954" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="14">
+    <text x="155" y="287">西部</text><text x="267" y="360">成都</text><text x="345" y="276">西安</text><text x="405" y="371">武汉</text>
+    <text x="478" y="300">上海</text><text x="282" y="431">昆明</text><text x="354" y="417">广州</text><text x="355" y="215">北京</text>
+    <text x="418" y="246">济南</text><text x="448" y="402">福建</text>
+  </g>
+  <g transform="translate(705 235)">
+    <path d="M18 125v42h112v-42l-13-18H31Z" fill="#333a37"/><path d="M34 107h79l9 17H25Z" fill="#e7b44f"/>
+    <path d="M69 64v28m-14-14h28" stroke="#b9342a" stroke-width="8" stroke-linecap="round"/>
+    <path d="M68 92v12" stroke="#b9342a" stroke-width="7"/>
+    <rect x="38" y="128" width="23" height="20" rx="2" fill="#d9e1dc"/><rect x="88" y="128" width="23" height="20" rx="2" fill="#d9e1dc"/>
+    <text x="0" y="209" fill="#69716b" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15">站点服务车辆补充能量</text>
+  </g>
+  <g transform="translate(860 232)">
+    <text x="0" y="28" fill="#a23a31" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15" letter-spacing="2">截至 2026 年 8 月</text>
+    <text x="-8" y="124" fill="#252a28" font-family="Arial,sans-serif" font-size="78" font-weight="700">10,000</text>
+    <text x="0" y="157" fill="#606761" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="20">座闪充站</text>
+    <path d="M0 185h230" stroke="#aaa99e" stroke-width="2"/>
+    <text x="-4" y="276" fill="#b9342a" font-family="Arial,sans-serif" font-size="78" font-weight="700">332</text>
+    <text x="0" y="310" fill="#606761" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="20">座城市</text>
+  </g>
+  <text x="64" y="655" fill="#686d67" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15">站点与线路为科普示意，并非精确地图；数据来自企业 2026 年 8 月公布。</text>
+  <text x="1120" y="655" text-anchor="end" fill="#a43a31" font-family="Arial,sans-serif" font-size="13" letter-spacing="3">NETWORK / CN</text>
+</svg>

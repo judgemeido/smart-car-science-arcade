@@ -1,0 +1,49 @@
+/* The archive is a chronological wall of exhibits on desktop: one dated
+   entry per row, with a clear image/text split. Mobile keeps the same order
+   and stacks each exhibit into one readable column. */
+.history-paper .timeline-grid--chronology { grid-template-columns: minmax(0, 1fr); }
+.history-paper-lead { grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); align-items: center; }
+.history-paper .timeline-grid--chronology .timeline-rail { min-height: 0; }
+.history-paper .timeline-grid--chronology .event-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
+.history-paper .timeline-grid--chronology .timeline-event { grid-template-columns: 1fr; gap: 6px; min-height: 72px; padding: 12px; border: 1px solid var(--hairline); background: rgba(255, 255, 255, .025); }
+.history-paper .timeline-grid--chronology .timeline-event::before { display: none; }
+.history-paper .timeline-grid--chronology .event-year { color: var(--amber); font-size: clamp(15px, 1.35vw, 20px); font-weight: 650; letter-spacing: -.04em; line-height: 1.15; }
+.history-paper .timeline-grid--chronology .event-title { font-family: var(--body); font-size: 12px; }
+.history-paper .timeline-grid--chronology .timeline-event:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.history-paper .archive-list { grid-template-columns: 1fr; gap: 0; padding-top: 14px; }
+.history-paper .archive-article { display: block; padding: 34px 0 42px; border: 0; border-top: 1px solid var(--hairline); background: transparent; }
+.history-paper .archive-article:last-child { border-bottom: 1px solid var(--hairline); }
+.history-paper .archive-article__heading { display: flex; align-items: baseline; gap: 22px; padding: 0 0 18px; border: 0; }
+.history-paper .archive-article__heading h3 { min-width: 0; font-size: clamp(1.5rem, 2.8vw, 3rem); overflow-wrap: anywhere; }
+.history-paper .archive-article__badge { flex: 0 0 auto; margin-left: auto; padding: 5px 9px; border: 1px solid rgba(185, 52, 42, .55); color: #e1a39a; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; white-space: nowrap; }
+.history-paper #archive-2026-blade .archive-article__year,
+.history-paper #archive-2026-charge .archive-article__year { color: #e1a39a; }
+.history-paper .archive-article:nth-child(even) { background: rgba(255, 255, 255, .018); }
+.history-paper .archive-article__grid { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: clamp(28px, 5vw, 74px); align-items: center; padding-top: 0; }
+.history-paper .archive-article__media { min-width: 0; padding-right: clamp(20px, 4vw, 56px); border-right: 1px solid var(--hairline); }
+.history-paper .archive-article__media img { aspect-ratio: 1.55 / 1; }
+.history-paper .archive-article__copy { min-height: 0; padding-top: 4px; }
+.history-paper .archive-article__detail { max-width: 28em; font-size: clamp(1.15rem, 1.8vw, 1.55rem); line-height: 1.7; }
+.history-paper .archive-article__story { max-width: 42em; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--hairline); color: var(--muted); font-family: var(--body); font-size: 13px; line-height: 1.85; }
+.history-paper .archive-article__media--empty { min-height: 210px; border: 1px solid var(--hairline); }
+
+@media (max-width: 760px) {
+  .history-paper-lead { grid-template-columns: 1fr; }
+  .history-paper .timeline-grid--chronology .event-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .history-paper .timeline-grid--chronology .timeline-event { min-height: 76px; padding: 10px; }
+  .history-paper .archive-list { padding-top: 8px; }
+  .history-paper .archive-article { padding: 26px 0 30px; }
+  .history-paper .archive-article__heading { display: flex; gap: 10px; padding-bottom: 12px; }
+  .history-paper .archive-article__heading { flex-wrap: wrap; }
+  .history-paper .archive-article__heading h3 { font-size: 1.2rem; }
+  .history-paper .archive-article__heading h3:only-child { flex-basis: auto; }
+  .history-paper .archive-article__heading h3 { flex: 1 1 100%; order: 2; }
+  .history-paper .archive-article__badge { margin-left: auto; }
+  .history-paper .archive-article__year { font-size: 15px; }
+  .history-paper .timeline-grid--chronology .event-year { font-size: 15px; }
+  .history-paper .archive-article__grid { grid-template-columns: 1fr; gap: 16px; }
+  .history-paper .archive-article__media { padding-right: 0; padding-bottom: 16px; border-right: 0; border-bottom: 1px solid var(--hairline); }
+  .history-paper .archive-article__media img { aspect-ratio: 1.7 / 1; }
+  .history-paper .archive-article__detail { font-size: 13px; }
+  .history-paper .archive-article__story { margin-top: 14px; padding-top: 12px; font-size: 12px; }
+}

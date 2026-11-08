@@ -1,0 +1,8 @@
+node_modules
+dist
+.refactor-backup
+.superpowers
+public
+test-results
+playwright-report
+**/*.css

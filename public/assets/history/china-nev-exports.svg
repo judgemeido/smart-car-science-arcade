@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">中国新能源汽车驶向海外科普插图</title>
+  <desc id="desc">一艘装载新能源汽车的运输船从中国港口出发，沿海上航线驶向海外市场；画面展示 2025 年出口数据。</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4f1e9"/><stop offset="1" stop-color="#d9dfda"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d8e4df"/><stop offset="1" stop-color="#b6cbc6"/></linearGradient>
+    <linearGradient id="ship" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#3e4b49"/><stop offset="1" stop-color="#202a2a"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#252d2a" flood-opacity=".16"/></filter>
+  </defs>
+  <rect width="1200" height="720" fill="url(#paper)"/>
+  <path d="M0 0h16v720H0Z" fill="#b9342a"/>
+  <text x="62" y="76" fill="#a23a31" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="18" letter-spacing="5">中国智造 · 海外新航线</text>
+  <text x="62" y="136" fill="#292c2a" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="38" font-weight="700">新能源车，驶向世界</text>
+  <text x="64" y="172" fill="#626761" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="17">从中国港口出发，去往不同国家和地区</text>
+
+  <g filter="url(#shadow)">
+    <rect x="60" y="214" width="1080" height="386" rx="20" fill="url(#sea)"/>
+  </g>
+  <g opacity=".32" fill="none" stroke="#fffdf5" stroke-width="3">
+    <path d="M82 302c105-25 186 24 290 0s191-26 294 0 188 25 281 0 121-18 172-7"/>
+    <path d="M82 535c110-22 189 20 300 0s192-21 296 0 180 20 271 0 126-17 170-5"/>
+  </g>
+
+  <g transform="translate(112 267)">
+    <path d="m8 83 48-49 48-14 27-28 48 8 18 23 37 10 6 28-18 19-8 32-32 13-23 31-35-7-15-28-31-4-17-26-34 9Z" fill="#e8e4d7" stroke="#8e9b94" stroke-width="3"/>
+    <path d="m164 147 18 7-8 14-18-5Z" fill="#e8e4d7" stroke="#8e9b94" stroke-width="2"/>
+    <circle cx="218" cy="106" r="7" fill="#b9342a"/>
+    <circle cx="218" cy="106" r="17" fill="none" stroke="#b9342a" stroke-width="2" opacity=".5"/>
+    <path d="M218 105C280 53 335 55 392 103" fill="none" stroke="#b9342a" stroke-width="3" stroke-dasharray="7 9"/>
+    <text x="0" y="206" fill="#3e4b49" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="16" font-weight="700">中国港口</text>
+  </g>
+
+  <g transform="translate(432 343)" filter="url(#shadow)">
+    <path d="M10 133 470 133 424 205 55 205Z" fill="url(#ship)"/>
+    <path d="M29 128h424v12H29Z" fill="#b9342a"/>
+    <path d="M62 197h358" stroke="#e5b758" stroke-width="4" opacity=".9"/>
+    <path d="M116 114V57h287v57" fill="#e8ece5" stroke="#46524f" stroke-width="3"/>
+    <path d="M116 57h287v18H116Z" fill="#687a73"/>
+    <g fill="#f1eee6" stroke="#52615b" stroke-width="2">
+      <rect x="128" y="77" width="60" height="37" rx="4"/><rect x="195" y="77" width="60" height="37" rx="4"/>
+      <rect x="262" y="77" width="60" height="37" rx="4"/><rect x="329" y="77" width="60" height="37" rx="4"/>
+    </g>
+    <g fill="#b9342a">
+      <path d="m140 101 8-11h22l8 11Z"/><path d="m207 101 8-11h22l8 11Z"/><path d="m274 101 8-11h22l8 11Z"/><path d="m341 101 8-11h22l8 11Z"/>
+    </g>
+    <g fill="#303a38">
+      <circle cx="148" cy="103" r="3"/><circle cx="170" cy="103" r="3"/><circle cx="215" cy="103" r="3"/><circle cx="237" cy="103" r="3"/>
+      <circle cx="282" cy="103" r="3"/><circle cx="304" cy="103" r="3"/><circle cx="349" cy="103" r="3"/><circle cx="371" cy="103" r="3"/>
+    </g>
+    <path d="M90 128V45h7v83M83 45h22l-11-21Z" fill="#b9342a"/>
+    <path d="M90 26h24" stroke="#b9342a" stroke-width="4"/>
+    <text x="168" y="177" fill="#f5f1e8" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15" letter-spacing="2">新能源汽车运输船</text>
+  </g>
+
+  <g transform="translate(873 279)">
+    <path d="M29 28 49 8 69 18 91 9l28 16 34-3 21 18-8 23 22 18-15 26-26 4-21 22-28-11-15 15-29-13-24 5-9-19-24-15 7-23-12-19Z" fill="#e8e4d7" stroke="#8e9b94" stroke-width="3"/>
+    <path d="m136 138 15 2 13 16-12 17-17-7-8-16Z" fill="#e8e4d7" stroke="#8e9b94" stroke-width="2"/>
+    <path d="M0 115c50 17 93 20 145-3 37-16 71-17 108-6" fill="none" stroke="#b9342a" stroke-width="3" stroke-dasharray="7 9"/>
+    <circle cx="254" cy="105" r="7" fill="#b9342a"/>
+    <circle cx="254" cy="105" r="17" fill="none" stroke="#b9342a" stroke-width="2" opacity=".5"/>
+    <text x="57" y="214" fill="#3e4b49" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="16" font-weight="700">海外市场</text>
+  </g>
+
+  <g transform="translate(874 503)">
+    <text x="0" y="22" fill="#a23a31" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="14" letter-spacing="2">2025 年出口量</text>
+    <text x="-4" y="101" fill="#252a28" font-family="Arial,sans-serif" font-size="68" font-weight="700">261.5</text>
+    <text x="204" y="99" fill="#4b5651" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="20">万辆</text>
+  </g>
+  <text x="64" y="658" fill="#686d67" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15">出口，就是把在中国生产的汽车运到其他国家和地区。</text>
+  <text x="1122" y="658" text-anchor="end" fill="#a43a31" font-family="Arial,sans-serif" font-size="13" letter-spacing="3">CHINA → WORLD</text>
+</svg>

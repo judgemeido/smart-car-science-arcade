@@ -1,0 +1,98 @@
+/* The model chapter is an app-like viewport: lock the document itself while
+   keeping any overflow inside the control panel, so every existing model,
+   focus, vehicle, explode and part-picking interaction remains available. */
+html.page-explore,
+body.page-explore {
+  height: 100svh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.page-game,
+body.page-game {
+  height: 100svh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.page-game .site-shell {
+  height: 100svh;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+.page-game .chapter--game {
+  display: block;
+  height: 100svh;
+  min-height: 100svh;
+  padding: 0;
+  overflow: hidden;
+}
+
+.page-explore .site-shell {
+  height: 100svh;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+.page-explore .chapter--explore {
+  display: block;
+  height: 100svh;
+  min-height: 100svh;
+  padding: 0;
+  overflow: hidden;
+}
+
+.page-explore .explore-workbench {
+  height: 100%;
+  min-height: 0;
+  border: 0;
+}
+
+.page-explore .model-viewer,
+.page-explore .explore-panel {
+  min-height: 0;
+}
+
+.page-explore .explore-panel {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.page-explore .history-footer {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .page-explore .explore-workbench {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1.08fr) minmax(0, .92fr);
+  }
+
+  .page-explore .model-viewer {
+    min-height: 0;
+  }
+
+  .page-explore .explore-panel {
+    border-top: 1px solid var(--hairline);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .page-explore .explore-workbench {
+    grid-template-rows: minmax(0, 1.04fr) minmax(0, .96fr);
+  }
+
+  .page-explore .explore-panel {
+    padding-top: 18px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 760px) and (orientation: landscape) {
+  .page-explore .explore-workbench {
+    grid-template-rows: minmax(0, 1.18fr) minmax(0, .82fr);
+  }
+}

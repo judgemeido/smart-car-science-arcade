@@ -1,0 +1,39 @@
+html.page-immersive,
+body.page-immersive {
+  overflow: hidden;
+}
+.chapter {
+  position: relative;
+}
+.chapter-runtime {
+  position: absolute;
+  inset: 110px 4vw auto;
+  z-index: 8;
+  width: fit-content;
+  max-width: calc(100% - 8vw);
+  padding: 18px 22px;
+  color: #f1efe8;
+  background: #17211f;
+  border: 1px solid #6d756d;
+  font-size: 14px;
+}
+.chapter-runtime--error {
+  box-shadow: 0 8px 40px #0006;
+}
+.asset-retry {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: #dda35d;
+  color: #101714;
+  border-radius: 2px;
+  font: inherit;
+  cursor: pointer;
+}
+.asset-retry:focus-visible {
+  outline: 3px solid #91d8d0;
+  outline-offset: 3px;
+}
+.model-loading .asset-retry {
+  pointer-events: auto;
+}

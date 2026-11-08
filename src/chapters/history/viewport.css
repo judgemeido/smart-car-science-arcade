@@ -1,0 +1,7 @@
+/* Let the newspaper's tinted surface run edge-to-edge; retain only the
+   internal reading gutters so the long-form text stays comfortable to read. */
+.chapter--history { padding-left: 0; padding-right: 0; }
+
+@media (max-width: 760px) {
+  .chapter--history { padding-top: 76px; }
+}

@@ -3,3 +3,7 @@ dist/
 *.tsbuildinfo
 *.bak
 .DS_Store
+.refactor-backup/
+.superpowers/
+test-results/
+playwright-report/

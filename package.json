@@ -6,14 +6,21 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "check": "npm run test:unit && npm run build && npm run test:e2e",
+    "format": "prettier --write src tests *.config.ts"
   },
   "dependencies": {
     "three": "^0.180.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@types/three": "^0.180.0",
+    "prettier": "^3.6.2",
     "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vitest": "^4.1.12"
   }
 }

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">第二代刀片电池与闪充科普示意图</title>
+  <desc id="desc">展示电池包内部的长条电芯、闪充能量流和官方公布的充电时间数据</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f2efe8"/><stop offset="1" stop-color="#d8d7d0"/></linearGradient>
+    <linearGradient id="cell" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fffdf7"/><stop offset="1" stop-color="#aeb7b3"/></linearGradient>
+    <linearGradient id="energy" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#bd3328"/><stop offset="1" stop-color="#e5b758"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-30%" width="150%" height="170%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#222" flood-opacity=".16"/></filter>
+  </defs>
+  <rect width="1200" height="720" fill="url(#paper)"/>
+  <path d="M0 594H1200" stroke="#b9b7b0" stroke-width="2"/>
+  <path d="M0 0H16V720H0Z" fill="#b9342a"/>
+  <g fill="#292c2a" font-family="Arial,'Microsoft YaHei',sans-serif">
+    <text x="62" y="78" font-size="18" letter-spacing="5" fill="#a23a31">中国智造 · 电池技术</text>
+    <text x="62" y="138" font-size="38" font-weight="700">第二代刀片电池</text>
+    <text x="64" y="174" font-size="17" fill="#626761">更快补能 · 更安心出发</text>
+  </g>
+  <g filter="url(#shadow)" transform="translate(84 242)">
+    <path d="M48 126 423 20l372 109-375 123Z" fill="#3a4240"/>
+    <path d="M48 126v130l372 109V252Z" fill="#222827"/>
+    <path d="M420 252v113l375-130V129Z" fill="#303735"/>
+    <path d="M74 133 423 35l319 94-346 107Z" fill="#67726d" stroke="#e6e5dc" stroke-width="4"/>
+    <g fill="url(#cell)" stroke="#858e89" stroke-width="3">
+      <path d="m106 136 54-15 292 86-55 16Z"/><path d="m169 118 53-15 292 86-54 16Z"/>
+      <path d="m232 100 54-15 292 86-55 16Z"/><path d="m295 82 54-15 292 86-54 16Z"/>
+      <path d="m358 64 54-15 292 86-55 16Z"/>
+    </g>
+    <g fill="#c13a2e"><circle cx="123" cy="139" r="6"/><circle cx="187" cy="121" r="6"/><circle cx="250" cy="103" r="6"/><circle cx="313" cy="85" r="6"/><circle cx="376" cy="67" r="6"/></g>
+    <path d="M20 290h96" stroke="url(#energy)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M19 268v44m-12-22h25" stroke="#bd3328" stroke-width="8" stroke-linecap="round"/>
+    <path d="M117 290h140" stroke="url(#energy)" stroke-width="5" stroke-dasharray="12 12"/>
+    <text x="485" y="294" fill="#f0c56a" font-family="Arial,sans-serif" font-size="16" letter-spacing="3">ENERGY FLOW</text>
+  </g>
+  <g transform="translate(900 226)">
+    <rect width="238" height="156" rx="4" fill="#202624"/>
+    <text x="25" y="38" fill="#d9b363" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15" letter-spacing="2">官方公布 · 常温</text>
+    <text x="24" y="105" fill="#f2efe8" font-family="Arial,sans-serif" font-size="60" font-weight="700">5<span font-size="22">分钟</span></text>
+    <text x="26" y="137" fill="#bac2bc" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15">电量 10% → 70%</text>
+    <rect y="174" width="238" height="156" rx="4" fill="#b9342a"/>
+    <text x="25" y="212" fill="#f5d99a" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15" letter-spacing="2">发布会技术数据</text>
+    <text x="24" y="279" fill="#fffaf0" font-family="Arial,sans-serif" font-size="60" font-weight="700">9<span font-size="22">分钟</span></text>
+    <text x="26" y="311" fill="#f2d9d3" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15">电量 10% → 97%</text>
+  </g>
+  <text x="64" y="655" fill="#686d67" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="15">示意图非电池实物结构图；实际充电表现会受车型、温度与充电条件影响。</text>
+  <text x="1100" y="655" text-anchor="end" fill="#a43a31" font-family="Arial,sans-serif" font-size="13" letter-spacing="3">2026 / 03</text>
+</svg>

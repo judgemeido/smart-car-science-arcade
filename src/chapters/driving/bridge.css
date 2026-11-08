@@ -1,0 +1,151 @@
+/* DOM bridge for the Chapter 03 game shell. The game engine intentionally
+   exposes small, semantic data hooks; these rules keep the HUD readable even
+   when the game is embedded as a chapter instead of a standalone canvas. */
+.chapter--game .game-topline { position: absolute; inset: 24px 28px auto; z-index: 4; display: flex; justify-content: space-between; color: var(--game-muted); font-family: var(--mono); font-size: 9px; letter-spacing: .14em; pointer-events: none; }
+.chapter--game .game-hud { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: end; gap: 18px; top: 54px; }
+.chapter--game .game-hud__metric { justify-items: start; padding: 10px 14px; border-left: 1px solid var(--game-line); }
+.chapter--game .game-hud__metric span { color: var(--game-muted); font-family: var(--mono); font-size: 9px; letter-spacing: .14em; }
+.chapter--game .game-hud__metric strong { color: var(--game-ink); font-family: var(--mono); font-size: clamp(1.25rem, 2.5vw, 2rem); font-weight: 400; letter-spacing: .04em; }
+.chapter--game .game-hud__metric--energy { position: relative; min-width: 150px; }
+.chapter--game .game-energy-bar { display: block; width: 100%; height: 3px; margin-top: 4px; overflow: hidden; background: rgba(143,232,220,.16); }
+.chapter--game .game-energy-bar b { display: block; width: 0; height: 100%; background: linear-gradient(90deg, var(--game-cyan), var(--game-green)); box-shadow: 0 0 14px rgba(143,232,220,.7); transition: width .25s ease; }
+.chapter--game .game-hud__mode { align-self: center; color: var(--game-cyan); font-family: var(--mono); font-size: 9px; letter-spacing: .1em; white-space: nowrap; }
+.chapter--game .game-message { position: absolute; top: 106px; left: 50%; z-index: 7; padding: 9px 14px; color: var(--game-ink); font-family: var(--mono); font-size: 9px; letter-spacing: .08em; background: rgba(12,26,25,.84); border: 1px solid var(--game-line); opacity: 0; pointer-events: none; transform: translate(-50%, -8px); transition: opacity .25s ease, transform .25s ease; }
+.chapter--game .game-message.is-visible { opacity: 1; transform: translate(-50%, 0); }
+.chapter--game .game-stage__grid { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: .22; background-image: linear-gradient(rgba(143,232,220,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(143,232,220,.08) 1px, transparent 1px); background-size: 64px 64px; mask-image: linear-gradient(to bottom, transparent 5%, #000 32%, transparent 100%); }
+.chapter--game .game-stage__scanline { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: .11; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(234,241,237,.24) 4px); mix-blend-mode: screen; }
+.chapter--game .game-crosshair { position: absolute; top: 50%; left: 50%; z-index: 3; width: 74px; height: 74px; pointer-events: none; opacity: .28; transform: translate(-50%, -50%); }
+.chapter--game .game-crosshair span, .chapter--game .game-crosshair i { position: absolute; inset: 50% 0 auto; height: 1px; background: var(--game-cyan); }
+.chapter--game .game-crosshair i { inset: 0 auto 0 50%; width: 1px; height: auto; }
+.chapter--game .game-start-screen, .chapter--game .game-over-screen { position: absolute; inset: 0; z-index: 8; display: grid; align-content: center; justify-items: center; padding: 24px; background: rgba(4,12,12,.58); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transform: translateY(5px); transition: opacity .3s ease, transform .3s ease; }
+.chapter--game .game-start-screen.is-visible, .chapter--game .game-over-screen.is-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.chapter--game .game-start-screen > *, .chapter--game .game-over-screen > * { width: min(520px, 100%); }
+.chapter--game .game-start-screen h2, .chapter--game .game-over-screen h2 { margin-top: 14px; color: var(--game-ink); font-family: var(--display); font-size: clamp(3rem, 7vw, 6rem); font-weight: 400; letter-spacing: -.06em; line-height: .94; }
+.chapter--game .game-start-screen h2 em { color: var(--game-amber); font-style: normal; }
+.chapter--game .game-start-screen > p:not(.eyebrow), .chapter--game .game-over-screen > p:not(.eyebrow) { margin-top: 18px; color: var(--game-muted); font-size: 13px; line-height: 1.8; }
+.chapter--game .game-primary-button { display: inline-flex; align-items: center; justify-content: space-between; width: min(230px, 100%); margin-top: 26px; padding: 14px 16px; color: #0b1715; background: var(--game-amber); border: 1px solid var(--game-amber); font-size: 13px; transition: transform .2s ease, background .2s ease; }
+.chapter--game .game-primary-button:hover { background: #f3c78e; transform: translateY(-2px); }
+.chapter--game .game-primary-button b { font-size: 18px; font-weight: 400; }
+.chapter--game .game-instructions { display: flex; gap: 18px; margin-top: 18px; color: var(--game-muted); font-family: var(--mono); font-size: 9px; letter-spacing: .06em; }
+.chapter--game kbd { padding: 2px 5px; border: 1px solid var(--game-line); color: var(--game-ink); font: inherit; }
+.chapter--game .game-result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 24px; }
+.chapter--game .game-result-grid div { padding-top: 10px; border-top: 1px solid var(--game-line); }
+.chapter--game .game-result-grid span { display: block; color: var(--game-muted); font-family: var(--mono); font-size: 9px; }
+.chapter--game .game-result-grid strong { display: block; margin-top: 5px; color: var(--game-ink); font-family: var(--mono); font-size: 22px; font-weight: 400; }
+.chapter--game .game-panel { display: grid; gap: 18px; }
+.chapter--game .game-panel__intro > p:not(.eyebrow) { margin-top: 12px; }
+.chapter--game .game-status-card { padding: 14px 0 16px; border-top: 1px solid var(--game-line); border-bottom: 1px solid var(--game-line); }
+.chapter--game .game-status-card__label, .chapter--game .game-rules > span { color: var(--game-amber); font-family: var(--mono); font-size: 9px; letter-spacing: .14em; }
+.chapter--game .game-status-card strong { display: block; margin-top: 7px; color: var(--game-cyan); font-size: 15px; font-weight: 500; }
+.chapter--game .game-status-card p { margin-top: 8px; }
+.chapter--game .game-controls { position: static; display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.chapter--game .game-lane-button, .chapter--game .game-pause-button { display: grid; justify-items: center; gap: 4px; min-height: 54px; padding: 8px; color: var(--game-ink); background: rgba(12,24,24,.62); border: 1px solid var(--game-line); transition: background .2s ease, color .2s ease, transform .2s ease; }
+.chapter--game .game-lane-button span, .chapter--game .game-pause-button span { font-family: var(--mono); font-size: 18px; }
+.chapter--game .game-lane-button small, .chapter--game .game-pause-button small { color: var(--game-muted); font-size: 9px; }
+.chapter--game .game-lane-button:hover, .chapter--game .game-pause-button:hover { color: #07110f; background: var(--game-cyan); transform: translateY(-2px); }
+.chapter--game .game-autopilot-button { display: grid; grid-template-columns: auto 1fr; gap: 2px 9px; align-items: center; padding: 10px 12px; color: var(--game-ink); text-align: left; background: rgba(12,24,24,.62); border: 1px solid var(--game-line); }
+.chapter--game .game-autopilot-button span { grid-row: 1 / span 2; color: var(--game-green); font-size: 20px; }
+.chapter--game .game-autopilot-button strong { font-size: 12px; font-weight: 500; }
+.chapter--game .game-autopilot-button small { color: var(--game-muted); font-size: 9px; }
+.chapter--game .game-autopilot-button:disabled { opacity: .4; cursor: not-allowed; }
+.chapter--game .game-autopilot-button.is-active { color: #07110f; background: var(--game-green); border-color: var(--game-green); }
+.chapter--game .game-autopilot-button.is-active small { color: rgba(7,17,15,.72); }
+.chapter--game .game-rules { padding-top: 4px; }
+.chapter--game .game-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--game-line); color: var(--game-muted); font-family: var(--mono); font-size: 9px; }
+.chapter--game .game-footer .text-button { margin-top: 0; color: var(--game-ink); }
+
+@media (max-width: 900px) {
+  .chapter--game .game-hud { grid-template-columns: repeat(3, minmax(0, 1fr)); top: 52px; }
+  .chapter--game .game-hud__mode { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  .chapter--game .game-topline { inset: 14px 13px auto; font-size: 8px; }
+  .chapter--game .game-hud { inset: 44px 13px auto; gap: 6px; }
+  .chapter--game .game-hud__metric { padding: 8px 8px; }
+  .chapter--game .game-hud__metric strong { font-size: 1.1rem; }
+  .chapter--game .game-panel { top: auto; bottom: 13px; left: 13px; right: 13px; width: auto; padding: 13px 14px; transform: none; }
+  .chapter--game .game-panel__intro > p:not(.eyebrow), .chapter--game .game-rules { display: none; }
+  .chapter--game .game-footer { display: none; }
+  .chapter--game .game-start-screen h2, .chapter--game .game-over-screen h2 { font-size: clamp(2.8rem, 15vw, 4.8rem); }
+  .chapter--game .game-start-screen > p:not(.eyebrow) { font-size: 12px; }
+}
+
+/* Chapter 03 shell hooks used by the museum game markup. */
+.chapter--game .game-shell { grid-template-columns: minmax(0, 1fr); }
+.chapter--game .game-topline { position: absolute; inset: 24px 28px auto; z-index: 4; display: flex; justify-content: space-between; color: var(--game-muted); font-family: var(--mono); font-size: 9px; letter-spacing: .14em; pointer-events: none; }
+.chapter--game .game-hud { inset: 58px 28px auto; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: end; }
+.chapter--game .game-hud__metric { justify-items: start; }
+.chapter--game .game-hud__metric span, .chapter--game .game-hud__mode { color: var(--game-muted); font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
+.chapter--game .game-hud__metric strong { color: var(--game-ink); font-family: var(--mono); font-size: clamp(1.25rem, 2.4vw, 2rem); font-weight: 400; }
+.chapter--game .game-hud__metric--energy { grid-template-columns: auto minmax(130px, 1fr); gap: 8px 10px; align-items: center; }
+.chapter--game .game-hud__metric--energy i { grid-column: 1 / -1; display: block; width: min(220px, 22vw); height: 4px; overflow: hidden; background: rgba(143,232,220,.14); border: 1px solid rgba(143,232,220,.3); }
+.chapter--game .game-hud__metric--energy b { display: block; width: var(--energy, 0%); height: 100%; background: linear-gradient(90deg, #4cb8ac, var(--game-cyan)); transition: width .25s ease; }
+.chapter--game .game-hud__mode { justify-self: end; align-self: center; padding: 8px 10px; color: var(--game-cyan); border: 1px solid rgba(143,232,220,.28); background: rgba(8,18,18,.48); }
+.chapter--game .game-message { position: absolute; top: 104px; left: 50%; z-index: 6; padding: 8px 12px; color: var(--game-ink); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; background: rgba(8,18,18,.72); border: 1px solid var(--game-line); opacity: 0; pointer-events: none; transform: translate(-50%, -6px); transition: opacity .25s ease, transform .25s ease; }
+.chapter--game .game-message.is-visible { opacity: 1; transform: translate(-50%, 0); }
+.chapter--game .game-start-screen, .chapter--game .game-over-screen { position: absolute; inset: 0; z-index: 8; display: grid; place-content: center; justify-items: center; padding: 28px; text-align: center; background: rgba(4,12,12,.58); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+.chapter--game .game-start-screen.is-visible, .chapter--game .game-over-screen.is-visible { opacity: 1; pointer-events: auto; }
+.chapter--game .game-start-screen > *, .chapter--game .game-over-screen > * { max-width: 570px; }
+.chapter--game .game-start-screen h2, .chapter--game .game-over-screen h2 { margin-top: 14px; color: var(--game-ink); font-family: var(--display); font-size: clamp(3rem, 7vw, 6.8rem); font-weight: 400; letter-spacing: -.06em; line-height: .96; }
+.chapter--game .game-start-screen h2 em { color: var(--game-cyan); font-style: normal; }
+.chapter--game .game-start-screen p:not(.eyebrow) { margin-top: 18px; color: var(--game-muted); font-size: 13px; line-height: 1.8; }
+.chapter--game .game-primary-button { display: inline-flex; align-items: center; gap: 18px; margin-top: 26px; padding: 14px 18px; color: #07110f; background: var(--game-amber); border: 1px solid var(--game-amber); font-size: 12px; font-weight: 600; transition: transform .2s ease, background .2s ease; }
+.chapter--game .game-primary-button:hover, .chapter--game .game-primary-button:focus-visible { background: #f1c38a; transform: translateY(-2px); outline: none; }
+.chapter--game .game-instructions { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 18px; color: var(--game-muted); font-family: var(--mono); font-size: 9px; }
+.chapter--game kbd { padding: 3px 5px; color: var(--game-ink); border: 1px solid var(--game-line); background: rgba(255,255,255,.06); }
+.chapter--game .game-result-grid { display: grid; grid-template-columns: repeat(3, minmax(90px, 1fr)); gap: 12px; width: min(500px, 100%); margin-top: 26px; }
+.chapter--game .game-result-grid div { display: grid; gap: 7px; padding-top: 10px; border-top: 1px solid var(--game-line); }
+.chapter--game .game-result-grid span { color: var(--game-muted); font-family: var(--mono); font-size: 9px; }
+.chapter--game .game-result-grid strong { color: var(--game-ink); font-family: var(--mono); font-size: 22px; font-weight: 400; }
+.chapter--game .game-panel { top: auto; right: 28px; bottom: 30px; left: auto; width: min(290px, calc(100% - 56px)); transform: none; }
+.chapter--game .game-panel__intro h2 { font-family: var(--display); font-weight: 400; }
+.chapter--game .game-status-card { display: grid; gap: 7px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--game-line); }
+.chapter--game .game-status-card__label, .chapter--game .game-rules > span { color: var(--game-amber); font-family: var(--mono); font-size: 9px; letter-spacing: .14em; }
+.chapter--game .game-status-card strong { color: var(--game-cyan); font-size: 14px; font-weight: 500; }
+.chapter--game .game-status-card p, .chapter--game .game-rules p { margin-top: 0; font-size: 11px; line-height: 1.55; }
+.chapter--game .game-controls { position: static; margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); }
+.chapter--game .game-lane-button, .chapter--game .game-pause-button { min-height: 46px; color: var(--game-ink); background: rgba(12,24,24,.62); border: 1px solid var(--game-line); }
+.chapter--game .game-lane-button span, .chapter--game .game-pause-button span { display: block; font-size: 17px; }
+.chapter--game .game-lane-button small, .chapter--game .game-pause-button small { display: block; margin-top: 3px; color: var(--game-muted); font-family: var(--mono); font-size: 9px; }
+.chapter--game .game-lane-button:hover, .chapter--game .game-lane-button:focus-visible, .chapter--game .game-pause-button:hover, .chapter--game .game-pause-button:focus-visible { color: #07110f; background: var(--game-cyan); outline: none; }
+.chapter--game .game-autopilot-button { display: grid; grid-template-columns: auto 1fr; gap: 2px 9px; align-items: center; width: 100%; margin-top: 10px; padding: 10px 12px; color: var(--game-muted); text-align: left; background: rgba(167,231,174,.06); border: 1px solid rgba(167,231,174,.28); }
+.chapter--game .game-autopilot-button span { grid-row: 1 / span 2; color: var(--game-green); font-size: 20px; }
+.chapter--game .game-autopilot-button strong { color: var(--game-ink); font-size: 12px; font-weight: 500; }
+.chapter--game .game-autopilot-button small { color: var(--game-muted); font-family: var(--mono); font-size: 9px; }
+.chapter--game .game-autopilot-button:disabled { opacity: .42; cursor: not-allowed; }
+.chapter--game .game-autopilot-button.is-active { color: #07110f; background: var(--game-green); border-color: var(--game-green); }
+.chapter--game .game-autopilot-button.is-active strong, .chapter--game .game-autopilot-button.is-active small, .chapter--game .game-autopilot-button.is-active span { color: #07110f; }
+.chapter--game .game-rules { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--game-line); }
+.chapter--game .game-footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--game-line); color: var(--game-muted); font-family: var(--mono); font-size: 8px; }
+
+@media (max-width: 900px) {
+  .chapter--game .game-hud { inset: 54px 18px auto; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chapter--game .game-hud__mode { grid-column: 2; grid-row: 1; }
+  .chapter--game .game-panel { right: 14px; bottom: 14px; left: auto; width: min(290px, calc(100% - 28px)); padding: 14px; gap: 10px; }
+  .chapter--game .game-panel__intro > p:not(.eyebrow), .chapter--game .game-rules { display: none; }
+  .chapter--game .game-status-card { gap: 4px; margin-top: 4px; padding-top: 9px; }
+  .chapter--game .game-status-card p { font-size: 10px; }
+  .chapter--game .game-controls { margin-top: 8px; gap: 5px; }
+  .chapter--game .game-lane-button, .chapter--game .game-pause-button { min-height: 44px; }
+  .chapter--game .game-autopilot-button { margin-top: 6px; padding: 8px 10px; }
+  .chapter--game .game-footer { margin-top: 8px; padding-top: 8px; }
+}
+@media (max-width: 620px) {
+  .chapter--game .game-topline { inset: 15px 13px auto; font-size: 8px; }
+  .chapter--game .game-hud { inset: 48px 13px auto; gap: 9px; }
+  .chapter--game .game-hud__metric--energy i { width: 130px; }
+  .chapter--game .game-message { top: 100px; max-width: calc(100% - 26px); text-align: center; }
+  .chapter--game .game-panel { right: 13px; bottom: 13px; left: 13px; width: auto; padding: 13px 14px; }
+  .chapter--game .game-panel__intro > p:last-child, .chapter--game .game-rules { display: none; }
+  .chapter--game .game-footer { display: flex; }
+  .chapter--game .game-controls { margin-top: 10px; }
+  .chapter--game .game-start-screen, .chapter--game .game-over-screen { padding: 16px; }
+  .chapter--game .game-start-screen h2, .chapter--game .game-over-screen h2 { font-size: clamp(2.8rem, 15vw, 4.6rem); }
+  .chapter--game .game-start-screen p:not(.eyebrow) { font-size: 11px; line-height: 1.6; }
+  .chapter--game .game-result-grid { gap: 8px; }
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .history-paper .history-intro { grid-template-columns: minmax(0, 1fr) minmax(180px, .68fr); column-gap: 30px; }
+  .history-paper h1 { font-size: 4.25rem; }
+}

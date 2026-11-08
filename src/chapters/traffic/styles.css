@@ -1,0 +1,91 @@
+/* Chapter 04 / China road-safety choice experience ---------------------- */
+html.page-traffic,
+body.page-traffic { height: 100svh; overflow: hidden; overscroll-behavior: none; }
+.page-traffic .site-shell { height: 100svh; min-height: 100svh; overflow: hidden; }
+.page-traffic .topbar { mix-blend-mode: normal; }
+.page-traffic .brand,.page-traffic .chapter-indicator,.page-traffic .chapter-indicator__label { color: #243b32; }
+.page-traffic .brand-mark { color: #a87339; border-color: rgba(36,59,50,.28); }
+.page-traffic .menu-button span { background: #243b32; }
+.page-traffic .chapter--traffic { display: block; height: 100svh; min-height: 100svh; padding: 0; overflow: hidden; }
+.traffic-experience { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 39vw); height: 100svh; min-height: 0; padding-top: 98px; background: #dce7e2; }
+.traffic-stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: linear-gradient(180deg, #dbe9ed 0%, #eff2e8 61%, #aabcae 100%); }
+.traffic-stage canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: manipulation; }
+.traffic-stage__topline { position: absolute; top: 22px; left: clamp(16px, 3vw, 40px); right: clamp(16px, 3vw, 40px); z-index: 2; display: flex; justify-content: space-between; gap: 12px; color: rgba(30,48,45,.68); font: 9px/1.4 var(--mono); letter-spacing: .12em; pointer-events: none; }
+.traffic-stage__topline span:first-child { display: flex; align-items: center; gap: 9px; }
+.traffic-stage__topline i { display: grid; width: 26px; height: 26px; place-items: center; color: #fff7ea; background: #b37b40; border-radius: 50%; font: 9px var(--mono); font-style: normal; }
+.traffic-stage__stats { position: absolute; top: 64px; right: 22px; z-index: 2; display: flex; gap: 8px; pointer-events: none; }
+.traffic-stage__stats span { padding: 8px 10px; color: rgba(30,48,45,.72); background: rgba(249,251,247,.78); border: 1px solid rgba(46,76,66,.12); box-shadow: 0 6px 18px rgba(35,54,44,.06); backdrop-filter: blur(8px); font: 9px var(--mono); }
+.traffic-stage__stats b { margin-left: 7px; color: #167c6c; font-weight: 600; }
+.traffic-scene-caption { position: absolute; bottom: 22px; left: clamp(16px, 3vw, 40px); z-index: 2; display: grid; gap: 3px; padding: 9px 12px; color: rgba(30,48,45,.72); background: rgba(249,251,247,.72); border-left: 2px solid #c18b4e; backdrop-filter: blur(8px); pointer-events: none; }
+.traffic-scene-caption span { font: 8px var(--mono); letter-spacing: .1em; }
+.traffic-scene-caption b { font-size: 12px; font-weight: 550; }
+.traffic-panel { position: relative; z-index: 3; display: flex; min-height: 0; flex-direction: column; gap: clamp(15px, 2.3vh, 24px); overflow-y: auto; padding: clamp(22px, 3vw, 42px) clamp(20px, 3vw, 42px) 22px; color: #ebe8df; background: linear-gradient(155deg, #27312d, #18201d 82%); border-left: 1px solid rgba(44,62,53,.14); box-shadow: -22px 0 60px rgba(23,38,31,.14); scrollbar-color: rgba(220,171,110,.36) transparent; scrollbar-width: thin; }
+.traffic-panel__intro .eyebrow { display: flex; justify-content: space-between; gap: 10px; color: #d4aa75; font-size: 8px; letter-spacing: .12em; }
+.traffic-panel__intro h2 { margin-top: 16px; color: #f1efe8; font-size: clamp(2rem, 3vw, 3rem); letter-spacing: -.065em; line-height: 1.04; }
+.traffic-panel__intro h2 em { display: block; margin-top: 4px; color: #dfb67f; }
+.traffic-panel__intro > p:not(.eyebrow) { max-width: 33em; margin-top: 12px; color: rgba(235,232,223,.66); font-size: 11px; line-height: 1.75; }
+.traffic-question { display: grid; gap: 12px; padding: 17px; background: rgba(255,255,255,.035); border: 1px solid rgba(237,224,205,.13); }
+.traffic-question[hidden],.traffic-primary[hidden] { display: none; }
+.traffic-question__tag { display: flex; justify-content: space-between; color: #dfb67f; font: 9px var(--mono); letter-spacing: .1em; }
+.traffic-question h3 { color: #f3f0e8; font-size: clamp(1.15rem, 1.6vw, 1.55rem); font-weight: 550; line-height: 1.35; }
+.traffic-question > p { color: rgba(235,232,223,.7); font-size: 11px; line-height: 1.65; }
+.traffic-options { display: grid; gap: 7px; }
+.traffic-choice { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 9px 11px; color: rgba(235,232,223,.82); background: rgba(255,255,255,.035); border: 1px solid rgba(237,224,205,.12); text-align: left; font-size: 11px; line-height: 1.45; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.traffic-choice:hover:not(:disabled) { background: rgba(221,163,93,.11); border-color: rgba(221,163,93,.46); transform: translateY(-1px); }
+.traffic-choice:disabled { cursor: default; opacity: .74; }
+.traffic-choice__index { display: grid; width: 22px; height: 22px; flex: 0 0 22px; place-items: center; color: #d6ad77; border: 1px solid rgba(237,224,205,.2); border-radius: 50%; font: 9px var(--mono); }
+.traffic-choice.is-correct { color: #dff5e9; background: rgba(48,139,100,.17); border-color: rgba(90,194,139,.55); }
+.traffic-choice.is-correct .traffic-choice__index { color: #dff5e9; background: #3d9a70; border-color: #3d9a70; }
+.traffic-choice.is-selected-wrong { color: #f5e0d8; background: rgba(178,78,61,.17); border-color: rgba(226,130,106,.48); }
+.traffic-choice.is-selected-wrong .traffic-choice__index { color: #fff0e8; background: #b85f4d; border-color: #b85f4d; }
+.traffic-choice strong { flex: 1; font-size: inherit; font-weight: 450; }
+.traffic-choice__arrow { color: #d6ad77; font-size: 15px; }
+.traffic-feedback { min-height: 0; color: #b8d7c3; font-size: 10px; line-height: 1.65; }
+.traffic-feedback:empty { display: none; }
+.traffic-feedback.is-correct { color: #9fe1b8; }
+.traffic-feedback.is-wrong { color: #eeb29e; }
+.traffic-question__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.traffic-primary,.traffic-secondary { display: inline-flex; align-items: center; justify-content: space-between; gap: 22px; min-height: 42px; padding: 0 14px; font-size: 10px; transition: transform .18s ease, background .18s ease; }
+.traffic-primary { flex: 1 1 150px; color: #221c15; background: #dcb47e; }
+.traffic-primary:hover,.traffic-secondary:hover { transform: translateY(-1px); }
+.traffic-primary:hover { background: #e9c797; }
+.traffic-secondary { color: rgba(235,232,223,.76); background: rgba(255,255,255,.04); border: 1px solid rgba(237,224,205,.15); }
+.traffic-secondary[hidden] { display: none; }
+.traffic-rule-note { margin-top: auto; padding: 11px 0 0; border-top: 1px solid rgba(237,224,205,.13); }
+.traffic-rule-note > span { color: #d6ad77; font-size: 9px; }
+.traffic-rule-note p { margin-top: 5px; color: rgba(235,232,223,.52); font-size: 9px; line-height: 1.6; }
+.traffic-panel__footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; color: rgba(235,232,223,.42); border-top: 1px solid rgba(237,224,205,.1); font-size: 8px; }
+.traffic-panel__footer .text-button { margin-top: 0; color: #dfb67f; font-size: 10px; }
+@media (max-width: 900px) {
+  .traffic-experience { grid-template-columns: minmax(0, 1fr) minmax(320px, 43vw); }
+  .traffic-panel { gap: 14px; padding: 24px 20px 17px; }
+  .traffic-panel__intro h2 { margin-top: 11px; font-size: 2.15rem; }
+  .traffic-question { gap: 9px; padding: 13px; }
+  .traffic-choice { min-height: 38px; padding: 7px 9px; }
+}
+@media (max-width: 640px) {
+  .traffic-experience { display: block; padding-top: 80px; }
+  .traffic-stage { position: absolute; inset: 80px 0 0; }
+  .traffic-stage__topline { top: 13px; left: 13px; right: 13px; font-size: 7px; letter-spacing: .07em; }
+  .traffic-stage__topline i { width: 22px; height: 22px; }
+  .traffic-stage__stats { top: 45px; right: 10px; gap: 5px; }
+  .traffic-stage__stats span { padding: 6px 7px; font-size: 7px; }
+  .traffic-scene-caption { bottom: auto; top: 78px; left: 10px; padding: 7px 9px; }
+  .traffic-scene-caption span { font-size: 7px; }
+  .traffic-scene-caption b { font-size: 10px; }
+  .traffic-panel { position: absolute; right: 0; bottom: 0; left: 0; max-height: 59svh; gap: 10px; padding: 13px 14px max(12px, env(safe-area-inset-bottom)); border: 1px solid rgba(237,224,205,.15); border-bottom: 0; border-radius: 16px 16px 0 0; box-shadow: 0 -14px 36px rgba(12,20,17,.18); }
+  .traffic-panel__intro .eyebrow { font-size: 7px; }
+  .traffic-panel__intro h2 { margin-top: 7px; font-size: clamp(1.55rem, 7vw, 2rem); }
+  .traffic-panel__intro h2 em { display: inline; margin-left: 5px; }
+  .traffic-panel__intro > p:not(.eyebrow) { margin-top: 5px; font-size: 9px; line-height: 1.45; }
+  .traffic-question { gap: 7px; padding: 10px; }
+  .traffic-question__tag { font-size: 7px; }
+  .traffic-question h3 { font-size: 1rem; }
+  .traffic-question > p { font-size: 9px; line-height: 1.45; }
+  .traffic-options { grid-template-columns: 1fr 1fr; gap: 5px; }
+  .traffic-choice { min-height: 36px; gap: 6px; padding: 6px; font-size: 9px; }
+  .traffic-choice__index { width: 18px; height: 18px; flex-basis: 18px; font-size: 8px; }
+  .traffic-feedback { font-size: 9px; line-height: 1.45; }
+  .traffic-primary,.traffic-secondary { min-height: 36px; padding-inline: 10px; font-size: 9px; }
+  .traffic-rule-note,.traffic-panel__footer { display: none; }
+}
