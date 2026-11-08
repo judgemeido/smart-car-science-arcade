@@ -1,0 +1,11 @@
+export const ARCADE_CONTENT_VERSION = 'science-arcade-content-1';
+export const ARCADE_SCORING_VERSION = 'science-arcade-score-1';
+export const ARCADE_DATA_VERSION = 'science-arcade-1';
+export const ARCADE_SCHEMA_VERSION = 1;
+export const ARCADE_DURATION_MS = 360000;
+export const ARCADE_TARGET_MS = 180000;
+export const ARCADE_TOTAL_WEIGHT = 1000;
+export const ARCADE_STORAGE_KEY = 'science-arcade:local:v1';
+export const ARCADE_RETENTION_MS = 30 * 86400000;
+export const ARCADE_RECORD_LIMIT = 200;
+export const ARCADE_CHECKPOINT_MS = 5000;
