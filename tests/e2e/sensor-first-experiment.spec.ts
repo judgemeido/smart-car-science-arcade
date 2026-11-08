@@ -1,0 +1,48 @@
+import { expect, test } from '@playwright/test';
+import { mkdir } from 'node:fs/promises';
+import path from 'node:path';
+
+const evidence = path.resolve('.superpowers/sdd/2026-11-08-independent-science-games-plan/evidence-C');
+test('plays a real miss, hit, Tx error and Rx correction', async ({ page }) => {
+  await mkdir(evidence, { recursive: true });
+  await page.goto('/games/sensor/index.html');
+  await expect(page.getByRole('button', { name: '开始练习', exact: true })).toBeVisible();
+  await page.screenshot({ path: path.join(evidence, 'ready-desktop.png') });
+  await page.getByRole('button', { name: '开始练习', exact: true }).click();
+  await page.screenshot({ path: path.join(evidence, 'initial-desktop.png') });
+  await page.getByRole('button', { name: '发射一次', exact: true }).click();
+  await expect(page.locator('[data-game-feedback]')).toContainText('没有碰到');
+  await page.locator('[data-aim]').fill('-20');
+  await page.getByRole('button', { name: '发射一次', exact: true }).click();
+  await expect(page.locator('[data-game-feedback]')).toContainText('命中');
+  await page.getByRole('button', { name: '接收线头', exact: true }).click();
+  await page.getByRole('button', { name: 'Tx 发射口', exact: true }).click();
+  await page.getByRole('button', { name: '发射一次', exact: true }).click();
+  await expect(page.locator('[data-game-feedback]')).toContainText('接在发射口');
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: path.join(evidence, 'tx-wrong-desktop.png') });
+  await page.getByRole('button', { name: '接收线头', exact: true }).click();
+  await page.getByRole('button', { name: 'Rx 接收口', exact: true }).click();
+  await page.getByRole('button', { name: '发射一次', exact: true }).click();
+  await expect(page.locator('[data-game-feedback]')).toContainText('接收到');
+  await expect(page.locator('[data-progress]')).toHaveText('2 / 6');
+  await expect(page.locator('[data-distance]')).toContainText('8.0');
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: path.join(evidence, 'success-desktop.png') });
+});
+test('mobile controls, standard readiness and clock updates preserve focus', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/games/sensor/index.html');
+  await page.getByLabel('挑战档位').selectOption('standard');
+  await page.screenshot({ path: path.join(evidence, 'ready-mobile.png') });
+  await page.getByRole('button', { name: '开始练习', exact: true }).click();
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.screenshot({ path: path.join(evidence, 'initial-mobile-viewport.png') });
+  await page.screenshot({ path: path.join(evidence, 'initial-mobile.png'), fullPage: true });
+  await page.locator('[data-aim]').focus();
+  await page.waitForTimeout(650);
+  await expect(page.locator('[data-aim]')).toBeFocused();
+  const sizes = await page.locator('[data-game-controls] button').evaluateAll(nodes => nodes.map(node => { const r = node.getBoundingClientRect(); return { width: r.width, height: r.height }; }));
+  expect(sizes.every(size => size.width >= 44 && size.height >= 44)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
