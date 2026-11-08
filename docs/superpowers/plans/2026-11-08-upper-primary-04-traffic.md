@@ -10,6 +10,8 @@
 
 **Spec:** [新设计第 7 节](../specs/2026-11-08-upper-primary-learning-design.md#7-04-安全决策)。
 
+**Status:** 本章已实现，通过章内独立审查和实际浏览器回归；本地提交由集成负责人保存。浏览器用例在界面接入前编写，浏览器 RED 按并行构建隔离裁定省略；单元 RED/GREEN 和浏览器 GREEN 证据见 [实施记录](../../engineering/upper-primary-learning-progress.md)。
+
 ## Global Constraints
 
 [总 Plan 的全部约束](./2026-11-08-upper-primary-learning-plan.md#global-constraints) 逐条适用。原八题不替换、不加门禁，不改 8 分和原计时；新挑战不记入原分数。
@@ -30,11 +32,11 @@
 
 Produces `renderTrafficReview(host: HTMLElement, scenarios: readonly Scenario[], annotations: readonly TrafficReviewAnnotation[]): void`。原题正确答案从原 options.correct 读取，不复制到注释；复习显示全部选项解释，不假装有原状态未保存的八题个人答题历史。
 
-- [ ] 写映射测试：8 个注释与原场景一一对应，24 个 sourceChoiceId 都能找到原选项；打乱选项显示顺序仍按 ID 对应解释；五道进阶题 ID 独立于原场景。
-- [ ] 添加 E2E：原八题结束后可打开复习；关闭回到原成绩；重复打开不叠加处理器。运行 `npm run test:unit -- tests/unit/traffic/learning-data.test.ts` 和构建后的 `npm run test:e2e -- tests/e2e/traffic-learning.spec.ts`，确认新接口尚不存在时失败。
-- [ ] 转换 [04 内容包](../../content/2026-11-08-upper-primary/04-traffic.json)，建立原题注释与独立五题；原 rules、stopZ 与计时保持不动。
-- [ ] 接入结束后的复习入口，按 sourceScenarioId/sourceChoiceId 显示观察与解释，讨论题不自动评理由。只用当前真实原分数，不编造个人错题列表。
-- [ ] 重跑映射单元、构建及 traffic 新旧 E2E，通过后更新指南与记录。
+- [x] 写映射测试：8 个注释与原场景一一对应，24 个 sourceChoiceId 都能找到原选项；打乱选项显示顺序仍按 ID 对应解释；五道进阶题 ID 独立于原场景。
+- [x] 添加 E2E：原八题结束后可打开复习；关闭回到原成绩；重复打开不叠加处理器。单元新接口缺失时取得 RED；浏览器用例先编写，构建后由负责人串行验收 GREEN，未执行浏览器 RED。
+- [x] 转换 [04 内容包](../../content/2026-11-08-upper-primary/04-traffic.json)，建立原题注释与独立五题；原 rules、stopZ 与计时保持不动。
+- [x] 接入结束后的复习入口，按 sourceScenarioId/sourceChoiceId 显示观察与解释，讨论题不自动评理由。只用当前真实原分数，不编造个人错题列表。
+- [x] 重跑映射单元、构建及 traffic 新旧 E2E，通过后更新指南与记录。
 
 ## Task T2 / P2：五题观察—决策—反馈—总结
 
@@ -49,20 +51,20 @@ Produces `renderTrafficReview(host: HTMLElement, scenarios: readonly Scenario[],
 - Produces `createTrafficPracticeScene(parent: THREE.Group, scope: ReturnType<typeof createScope>): TrafficPracticeScene`；返回 `show(scenario: TrafficPracticeScenario): void`、`showDecision(verdict: 'correct' | 'incorrect'): void`、`update(deltaSeconds: number): void`、`hide(): void`。
 - Produces `renderTrafficPractice(host: HTMLElement, state: TrafficPracticeState, scenarios: readonly TrafficPracticeScenario[]): void`；场景与界面读取同一题 ID 和状态。
 
-- [ ] 写失败测试：ready 阶段不能 answer；未 observed 不能 answer；未知 ID 不变；答错不能进入 summarize，retry 回到 decide；答对后需要两次有阶段意义的 continue 才进入下一题；重复发送同一 fromPhase/scenarioId 的 continue 不跳过总结，旧题事件不推进新题。
-- [ ] 增加测试：五题各掌握一次才 complete；重复提交不重复登记；reset 只清进阶状态，`expect(originalTrafficState.score).toBe(8)` 仍成立；阶段机不导入原 reduceTraffic。
-- [ ] 运行 `npm run test:unit -- tests/unit/traffic/practice-state.test.ts`，确认接口未实现导致失败。
-- [ ] 实现新纯阶段机。反馈与总结主动继续，按钮携带生成时的阶段和题 ID，消费后立即禁用原按钮；阶段上下文不匹配的重复事件忽略。不派发旧 `schedule-continue` 效果，不启用 100 分或首答计分。
-- [ ] 在独立场景组制作五种教学情境：绿灯且无人冲突；给定停车空间的横穿行人；邻道安全未知的障碍；雨/湿滑/低视线；感知不可靠提示。正确行动与风险解释匹配给定条件，不以随机动画决定安全。
-- [ ] 写场景测试：show/hide 后不改变原场景对象变换，切题只显示一题的道具；scope 销毁释放新几何/材质。接入当前 renderer，使用独立组和现有 animation loop，不增加第二套驾驶引擎。
-- [ ] controller 只在原 ready/complete 阶段开放进阶入口，保存原场景可见性与相机姿态；活动时停旧道路更新，退出恢复并保持原成绩。新动画受 setActive 控制，重建时创建新的进阶状态。
-- [ ] 增加 E2E：错误后重试、总结后继续、五题完成；原八题 8 分不变；切章暂停/返回、退出视角恢复、模型失败文字情境可用、重复开启没有重复提交。
-- [ ] 运行 practice 单元、`npm run build`、`npm run test:e2e -- tests/e2e/traffic-learning.spec.ts tests/e2e/traffic-domain.spec.ts`，通过后更新真实记录。
+- [x] 写失败测试：ready 阶段不能 answer；未 observed 不能 answer；未知 ID 不变；答错不能进入 summarize，retry 回到 decide；答对后需要两次有阶段意义的 continue 才进入下一题；重复发送同一 fromPhase/scenarioId 的 continue 不跳过总结，旧题事件不推进新题。
+- [x] 增加测试：五题各掌握一次才 complete；重复提交不重复登记；reset 只清进阶状态，`expect(originalTrafficState.score).toBe(8)` 仍成立；阶段机不导入原 reduceTraffic。
+- [x] 运行 `npm run test:unit -- tests/unit/traffic/practice-state.test.ts`，确认接口未实现导致失败。
+- [x] 实现新纯阶段机。反馈与总结主动继续，按钮携带生成时的阶段和题 ID，消费后立即禁用原按钮；阶段上下文不匹配的重复事件忽略。不派发旧 `schedule-continue` 效果，不启用 100 分或首答计分。
+- [x] 在独立场景组制作五种教学情境：绿灯且无人冲突；给定停车空间的横穿行人；邻道安全未知的障碍；雨/湿滑/低视线；感知不可靠提示。正确行动与风险解释匹配给定条件，不以随机动画决定安全。
+- [x] 写场景测试：show/hide 后不改变原场景对象变换，切题只显示一题的道具；scope 销毁释放新几何/材质。接入当前 renderer，使用独立组和现有 animation loop，不增加第二套驾驶引擎。
+- [x] controller 只在原 ready/complete 阶段开放进阶入口，保存原场景可见性与相机姿态；活动时停旧道路更新，退出恢复并保持原成绩。新动画受 setActive 控制，重建时创建新的进阶状态。
+- [x] 增加 E2E：错误后重试、总结后继续、五题完成；原八题 8 分不变；切章暂停/返回、退出视角恢复、模型失败文字情境可用、重复开启没有重复提交。
+- [x] 运行 practice 单元、`npm run build`、`npm run test:e2e -- tests/e2e/traffic-learning.spec.ts tests/e2e/traffic-domain.spec.ts`，通过后更新真实记录。
 
 ## 04 完成条件
 
-- [ ] 原八题、8 分、计时与过街机制仍可完整使用。
-- [ ] 进阶五题有清楚的观察条件、解释和主动继续，完成数不冒充原分数。
-- [ ] 场景表现与题目条件一致，退出后恢复原玩法并清理资源。
+- [x] 原八题、8 分、计时与过街机制仍可完整使用。
+- [x] 进阶五题有清楚的观察条件、解释和主动继续，完成数不冒充原分数。
+- [x] 场景表现与题目条件一致，退出后恢复原玩法并清理资源。
 
-本计划只实施 04；公共文件归集成负责人。未获得实施指令前保持任务未勾选，不自动提交。
+本计划只实施 04；用户已授权并行实施与逐章本地提交，公共文件和 Git 索引归集成负责人。

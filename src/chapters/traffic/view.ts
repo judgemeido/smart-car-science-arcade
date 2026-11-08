@@ -29,6 +29,11 @@ export const view = `
               <button class="traffic-secondary" type="button" data-traffic-reset>重新开始 <span>↺</span></button>
             </div>
           </section>
+          <div class="traffic-learning-entry" data-traffic-learning-entry>
+            <button class="traffic-secondary" type="button" data-traffic-practice-open>五题进阶 · 先观察再决策</button>
+            <button class="traffic-secondary" type="button" data-traffic-review-open hidden>复习全部八题</button>
+          </div>
+          <section class="traffic-learning" data-traffic-learning aria-label="道路安全学习" aria-live="polite" hidden></section>
           <div class="traffic-rule-note"><span>出行小提醒</span><p>游戏帮助认识常见规则。上路时要遵守交通信号，并听从现场交警指挥。</p></div>
           <div class="traffic-panel__footer"><button class="text-button" type="button" data-next="lidar">返回激光雷达 <span>↗</span></button><span>智驾博物馆 · 04</span></div>
         </aside>

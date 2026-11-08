@@ -11,6 +11,14 @@ import { loadGltf } from '../../shared/gltf';
 import { disposeObject } from '../../shared/three-resources';
 import type { ChapterController } from '../../app/types';
 import { watchWebglContext, reportChapterError } from '../../shared/webgl';
+import { trafficReviewAnnotations, trafficPracticeScenarios } from './learning-data';
+import { renderTrafficReview, renderTrafficPractice } from './learning-view';
+import {
+  createTrafficPracticeState,
+  reduceTrafficPractice,
+  type TrafficPracticeEvent,
+} from './practice-state';
+import { createTrafficPracticeScene } from './practice-scene';
 
 export function mount(host: HTMLElement): ChapterController {
   const scope = createScope();
@@ -29,6 +37,10 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
   const startButton = host.querySelector<HTMLButtonElement>('[data-traffic-start]');
   const resetButton = host.querySelector<HTMLButtonElement>('[data-traffic-reset]');
   const nextButton = host.querySelector<HTMLButtonElement>('[data-traffic-next]');
+  const learningHost = host.querySelector<HTMLElement>('[data-traffic-learning]');
+  const learningEntry = host.querySelector<HTMLElement>('[data-traffic-learning-entry]');
+  const practiceButton = host.querySelector<HTMLButtonElement>('[data-traffic-practice-open]');
+  const reviewButton = host.querySelector<HTMLButtonElement>('[data-traffic-review-open]');
   if (!canvas || !overlay || !optionHost) throw new Error('道路安全展厅缺少视图');
 
   const environment = createScene(canvas, scope);
@@ -68,10 +80,129 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
   let active = false;
   let state = createTrafficState();
   let world = createWorldState();
+  let practiceState = createTrafficPracticeState();
+  let learningMode: 'original' | 'practice' | 'review' = 'original';
+  const practiceParent = new THREE.Group();
+  scene.add(practiceParent);
+  const practiceScene = createTrafficPracticeScene(practiceParent, scope);
+  scope.add(() => practiceParent.removeFromParent());
+  let snapshot: {
+    visible: { object: THREE.Object3D; value: boolean }[];
+    position: THREE.Vector3;
+    quaternion: THREE.Quaternion;
+    zoom: number;
+    fov: number;
+  } | null = null;
+  let lastPracticeSceneId: string | null = null;
   const feedbackTimer = createPausableTimer();
   scope.add(() => feedbackTimer.dispose());
   const cameraTarget = new THREE.Vector3();
   const cameraDesired = new THREE.Vector3();
+
+  function renderLearningEntry() {
+    if (learningEntry) learningEntry.hidden = learningMode !== 'original';
+    if (practiceButton)
+      practiceButton.hidden = learningMode !== 'original' || !['ready', 'complete'].includes(state.phase);
+    if (reviewButton) reviewButton.hidden = learningMode !== 'original' || state.phase !== 'complete';
+  }
+
+  function renderOriginal() {
+    const scenario = scenarios[state.scenarioIndex];
+    const choice = scenario.options.find((option) => option.choiceId === state.answeredChoiceId);
+    renderTrafficUI(
+      host,
+      state,
+      scenario,
+      choice ? { choiceId: choice.choiceId, correct: choice.correct } : null,
+    );
+    renderLearningEntry();
+  }
+
+  function renderPractice(restartScene = false) {
+    if (!learningHost) return;
+    const scenario = trafficPracticeScenarios[practiceState.scenarioIndex];
+    if (scenario && (restartScene || lastPracticeSceneId !== scenario.id)) {
+      practiceScene.show(scenario);
+      lastPracticeSceneId = scenario.id;
+    }
+    if (practiceState.verdict && ['feedback', 'summarize', 'complete'].includes(practiceState.phase))
+      practiceScene.showDecision(practiceState.verdict);
+    renderTrafficPractice(learningHost, practiceState, trafficPracticeScenarios);
+    setText(
+      host,
+      '[data-traffic-state]',
+      practiceState.phase === 'complete'
+        ? '进阶五题完成 · 原道路分数保留'
+        : '安全决策 · 先读条件，再选择行动',
+    );
+  }
+
+  function enterLearning(mode: 'practice' | 'review') {
+    if (!learningHost || learningMode !== 'original') return;
+    if (mode === 'practice' && !['ready', 'complete'].includes(state.phase)) return;
+    if (mode === 'review' && state.phase !== 'complete') return;
+    learningMode = mode;
+    overlay!.hidden = true;
+    overlay!.setAttribute('aria-hidden', 'true');
+    learningHost.hidden = false;
+    if (mode === 'practice') {
+      snapshot = {
+        visible: [environment.city, car].map((object) => ({ object, value: object.visible })),
+        position: camera.position.clone(),
+        quaternion: camera.quaternion.clone(),
+        zoom: camera.zoom,
+        fov: camera.fov,
+      };
+      snapshot.visible.forEach(({ object }) => {
+        object.visible = false;
+      });
+      camera.position.set(10.5, 9.2, 15.8);
+      camera.lookAt(0.6, 0.7, -2.5);
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      canvas!.dataset.sceneMode = 'practice';
+      renderPractice(true);
+    } else renderTrafficReview(learningHost, scenarios, trafficReviewAnnotations);
+    renderLearningEntry();
+    learningHost
+      .querySelector<HTMLElement>('[data-traffic-learning-heading]')
+      ?.focus({ preventScroll: true });
+  }
+
+  function exitLearning(focusEntry = true) {
+    if (learningMode === 'original') return;
+    const previousMode = learningMode;
+    practiceScene.hide();
+    lastPracticeSceneId = null;
+    if (snapshot) {
+      snapshot.visible.forEach(({ object, value }) => {
+        object.visible = value;
+      });
+      camera.position.copy(snapshot.position);
+      camera.quaternion.copy(snapshot.quaternion);
+      camera.zoom = snapshot.zoom;
+      camera.fov = snapshot.fov;
+      camera.updateProjectionMatrix();
+      snapshot = null;
+    }
+    learningMode = 'original';
+    canvas!.dataset.sceneMode = 'original';
+    if (learningHost) learningHost.hidden = true;
+    renderOriginal();
+    if (focusEntry)
+      (previousMode === 'practice' ? practiceButton : reviewButton)?.focus({ preventScroll: true });
+  }
+
+  function dispatchPractice(event: TrafficPracticeEvent) {
+    if (learningMode !== 'practice') return;
+    const next = reduceTrafficPractice(practiceState, event, trafficPracticeScenarios);
+    if (next === practiceState) return;
+    practiceState = next;
+    renderPractice(event.type === 'retry' || event.type === 'reset');
+    learningHost
+      ?.querySelector<HTMLElement>('[data-traffic-learning-heading]')
+      ?.focus({ preventScroll: true });
+  }
 
   function applyScenario() {
     const scenario = scenarios[state.scenarioIndex];
@@ -87,6 +218,7 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
   }
 
   function dispatch(event: TrafficEvent) {
+    if (learningMode !== 'original') return;
     const transition = reduceTraffic(state, event, scenarios);
     if (transition.state === state) return;
     state = transition.state;
@@ -114,14 +246,7 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
       }
       // show-result is represented by complete and rendered with the same state below.
     }
-    const scenario = scenarios[state.scenarioIndex];
-    const choice = scenario.options.find((option) => option.choiceId === state.answeredChoiceId);
-    renderTrafficUI(
-      host,
-      state,
-      scenario,
-      choice ? { choiceId: choice.choiceId, correct: choice.correct } : null,
-    );
+    renderOriginal();
   }
 
   scope.listen(startButton, 'click', () => dispatch({ type: 'start' }));
@@ -131,6 +256,47 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-choice-id]');
     if (!button || !optionHost.contains(button) || button.disabled) return;
     dispatch({ type: 'answer', choiceId: button.dataset.choiceId ?? '' });
+  });
+  scope.listen(practiceButton, 'click', () => enterLearning('practice'));
+  scope.listen(reviewButton, 'click', () => enterLearning('review'));
+  scope.listen(learningHost, 'click', (event: MouseEvent) => {
+    const button = (event.target as Element).closest<HTMLButtonElement>('button');
+    if (!button || !learningHost?.contains(button) || button.disabled) return;
+    if (button.hasAttribute('data-traffic-learning-close')) {
+      button.disabled = true;
+      exitLearning();
+      return;
+    }
+    if (learningMode !== 'practice') return;
+    let practiceEvent: TrafficPracticeEvent | null = null;
+    if (button.hasAttribute('data-traffic-practice-start')) practiceEvent = { type: 'start' };
+    else if (button.hasAttribute('data-traffic-practice-observed')) practiceEvent = { type: 'observed' };
+    else if (button.hasAttribute('data-traffic-practice-choice'))
+      practiceEvent = { type: 'answer', choiceId: button.dataset.trafficPracticeChoice ?? '' };
+    else if (button.hasAttribute('data-traffic-practice-retry')) practiceEvent = { type: 'retry' };
+    else if (button.hasAttribute('data-traffic-practice-reset')) practiceEvent = { type: 'reset' };
+    else if (button.hasAttribute('data-traffic-practice-continue')) {
+      const fromPhase = button.dataset.fromPhase;
+      if (fromPhase === 'feedback' || fromPhase === 'summarize')
+        practiceEvent = { type: 'continue', fromPhase, scenarioId: button.dataset.scenarioId ?? '' };
+    }
+    if (practiceEvent) {
+      button.disabled = true;
+      dispatchPractice(practiceEvent);
+      if (button.isConnected) button.disabled = false;
+    }
+  });
+  // A page exit clears only the new learning memory, including BFCache exits.
+  // Normal chapter suspension uses setActive and keeps practice progress.
+  scope.listen(window, 'pagehide', () => {
+    exitLearning(false);
+    practiceState = createTrafficPracticeState();
+    learningHost?.replaceChildren();
+    if (learningHost) {
+      delete learningHost.dataset.phase;
+      delete learningHost.dataset.scenarioId;
+      delete learningHost.dataset.mode;
+    }
   });
 
   const resizeObserver = new ResizeObserver(resize);
@@ -146,6 +312,8 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
   overlay.hidden = false;
   overlay.classList.add('is-visible', 'is-ready');
   overlay.setAttribute('aria-hidden', 'false');
+  canvas.dataset.sceneMode = 'original';
+  renderLearningEntry();
 
   function resize() {
     const width = canvas?.clientWidth || host.clientWidth || 1;
@@ -159,6 +327,15 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
 
   function animate(delta: number) {
     if (disposed || !active) return;
+    if (learningMode === 'practice') {
+      practiceScene.update(delta);
+      renderer.render(scene, camera);
+      return;
+    }
+    if (learningMode === 'review') {
+      renderer.render(scene, camera);
+      return;
+    }
     world = stepWorld(
       { ...world, driving: state.phase === 'driving' },
       delta,

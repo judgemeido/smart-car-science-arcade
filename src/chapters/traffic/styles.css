@@ -1,4 +1,22 @@
 /* Chapter 04 / China road-safety choice experience ---------------------- */
+.traffic-learning[hidden], .traffic-learning-entry[hidden] { display: none; }
+.traffic-learning-entry { display: grid; gap: 8px; }
+.traffic-learning-entry .traffic-secondary { min-height: 44px; font-size: 13px; line-height: 1.5; }
+.traffic-learning { display: grid; gap: 13px; padding: 18px; border: 1px solid rgba(223,182,127,.35); background: rgba(255,255,255,.04); font-size: 14px; line-height: 1.7; }
+.traffic-learning h3 { color: #f3f0e8; font-size: 22px; line-height: 1.35; }
+.traffic-learning h3:focus { outline: none; }
+.traffic-learning p { margin: 0; color: #deddd4; }
+.traffic-learning ul { margin: 0; padding-left: 22px; color: #deddd4; }
+.traffic-learning .traffic-learning__phase, .traffic-learning .traffic-learning__progress { color: #dfb67f; }
+.traffic-learning .traffic-learning__feedback { border-left: 3px solid #9fe1b8; padding: 9px 12px; color: #c4edd1; background: rgba(48,139,100,.12); }
+.traffic-learning .traffic-learning__scene-note { color: #c1c8c1; font-size: 12px; }
+.traffic-learning__choices { display: grid; gap: 8px; }
+.traffic-learning .traffic-secondary { width: 100%; min-height: 44px; padding: 10px 13px; font-size: 14px; text-align: left; line-height: 1.55; }
+.traffic-learning button:focus-visible, .traffic-learning-entry button:focus-visible, .traffic-learning summary:focus-visible { outline: 3px solid #dfb67f; outline-offset: 3px; }
+.traffic-learning details { padding: 10px 0; border-top: 1px solid rgba(237,224,205,.2); }
+.traffic-learning summary { cursor: pointer; min-height: 44px; color: #dfb67f; }
+.traffic-learning details p, .traffic-learning details ul { margin: 10px 0; }
+.traffic-learning [data-traffic-review-choice] { padding: 10px 0; border-bottom: 1px solid rgba(237,224,205,.12); }
 html.page-traffic,
 body.page-traffic { height: 100svh; overflow: hidden; overscroll-behavior: none; }
 .page-traffic .site-shell { height: 100svh; min-height: 100svh; overflow: hidden; }
