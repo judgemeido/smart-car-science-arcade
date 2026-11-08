@@ -11,6 +11,24 @@ import { createScope, createAnimationLoop } from '../../shared/lifecycle';
 import { disposeObject } from '../../shared/three-resources';
 import type { ChapterController } from '../../app/types';
 import { watchWebglContext, reportChapterError } from '../../shared/webgl';
+import * as THREE from 'three';
+import { lidarLearningContent } from './learning-data';
+import { createLidarLearningState, reduceLidarLearning, type LidarLearningAction } from './learning-state';
+import {
+  createWeatherLearningState,
+  reduceWeatherLearning,
+  type WeatherLearningAction,
+  type LearningWeather,
+} from './weather-state';
+import { createDistanceTargets, worldTargets, type MeterTarget } from './learning-measurement';
+import { createLidarLearningWorld } from './learning-world';
+import { renderLidarLearningGuide, updateLidarLearningView, type LidarLearningTab } from './learning-view';
+import {
+  captureLidarCamera,
+  restoreLidarCamera,
+  installWithLearningCamera,
+  type LidarCameraSnapshot,
+} from './learning-camera';
 
 export type LidarExplorerController = (() => void) &
   ChapterController & {
@@ -43,6 +61,23 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
   let loadVersion = 0;
   let disposed = false;
   let assetStatus: 'loading' | 'ready' | 'degraded' = 'loading';
+  const learningHost = host.querySelector<HTMLElement>('[data-lidar-learning]');
+  const learningToggle = host.querySelector<HTMLElement>('[data-lidar-learning-toggle]');
+  const learningLabels = host.querySelector<HTMLElement>('[data-lidar-learning-labels]');
+  const learningNote = host.querySelector<HTMLElement>('[data-lidar-learning-stage-note]');
+  let learningState = createLidarLearningState();
+  let weatherState = createWeatherLearningState();
+  let learningOpen = false;
+  let learningTab: LidarLearningTab = 'guide';
+  let learningScanRunning = true;
+  let selectedWorldId: string | null = null;
+  let worldVisible = false;
+  let displayedTargets: readonly MeterTarget[] = [];
+  let savedCamera: LidarCameraSnapshot | null = null;
+  const learningParent = new THREE.Group();
+  scene.scene.add(learningParent);
+  const learningWorld = createLidarLearningWorld(learningParent, scope);
+  if (learningHost) renderLidarLearningGuide(learningHost, lidarLearningContent);
 
   const statusElement = host.querySelector<HTMLElement>('[data-lidar-status]');
   const partNameElement = host.querySelector<HTMLElement>('[data-lidar-part-name]');
@@ -70,6 +105,155 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
   const setText = (element: HTMLElement | null, value: string) => {
     if (element) element.textContent = value;
   };
+  const syncLearningScene = () => {
+    const visible = learningOpen && learningTab !== 'guide';
+    if (visible && !worldVisible) {
+      savedCamera = captureLidarCamera(camera, controls);
+      controls.minDistance = 1.8;
+      controls.maxDistance = 9;
+      camera.position.set(3.5, 3.8, 4.7);
+      controls.target.set(0, 0, -0.35);
+      controls.update();
+    } else if (!visible && worldVisible && savedCamera) {
+      restoreLidarCamera(camera, controls, savedCamera);
+      savedCamera = null;
+    }
+    worldVisible = visible;
+    learningWorld.setVisible(visible);
+    scene.modelGroup.visible = !visible;
+    scene.exhibitPedestal.visible = !visible;
+    const hotspots = scene.scene.getObjectByName('SEMANTIC_HOTSPOTS');
+    if (hotspots) hotspots.visible = !visible;
+    scene.scanGroup.visible = !visible && state.scanActive;
+    host.classList.toggle('is-learning-world', visible);
+    if (learningLabels) learningLabels.hidden = !visible;
+    if (learningNote) {
+      learningNote.hidden = !visible;
+      learningNote.textContent = `${assetStatus === 'degraded' ? '模型载入失败；教学几何仍可使用 · ' : ''}教学模型与点云 · 目标底部标记是距离参考点`;
+    }
+    canvas.setAttribute(
+      'aria-label',
+      visible
+        ? '教学目标与点云，可拖动旋转、缩放；也可用目标列表选择'
+        : 'Velodyne VLP-16 激光雷达三维模型，可拖动旋转并缩放',
+    );
+  };
+  const syncLearning = () => {
+    if (learningHost) {
+      learningHost.hidden = !learningOpen;
+      updateLidarLearningView(
+        learningHost,
+        lidarLearningContent,
+        learningState,
+        weatherState,
+        learningTab,
+        learningScanRunning,
+        selectedWorldId,
+      );
+    }
+    learningToggle?.setAttribute('aria-expanded', String(learningOpen));
+    setText(learningToggle, learningOpen ? '收起传感器实验室' : '打开传感器实验室');
+    const targets =
+      learningTab === 'distance'
+        ? createDistanceTargets(lidarLearningContent.distance.rounds[learningState.roundIndex])
+        : worldTargets;
+    if (targets.map((target) => target.id).join() !== displayedTargets.map((target) => target.id).join()) {
+      displayedTargets = targets;
+      learningWorld.setTargets(targets);
+      if (learningLabels) {
+        learningLabels.replaceChildren(
+          ...targets.map((target) => {
+            const label = document.createElement('button');
+            label.type = 'button';
+            label.dataset.lidarSceneTarget = target.id;
+            label.textContent = target.label;
+            return label;
+          }),
+        );
+      }
+    }
+    learningWorld.setWeather(learningTab === 'weather' ? weatherState.weather : 'normal');
+    learningWorld.setScanRunning(learningScanRunning);
+    const selected = learningTab === 'distance' ? learningState.selectedTargetId : selectedWorldId;
+    learningWorld.setSelectedTarget(selected);
+    learningLabels
+      ?.querySelectorAll<HTMLElement>('[data-lidar-scene-target]')
+      .forEach((label) =>
+        label.setAttribute('aria-pressed', String(label.dataset.lidarSceneTarget === selected)),
+      );
+    syncLearningScene();
+  };
+  const dispatchLearning = (action: LidarLearningAction) => {
+    if (disposed) return;
+    learningState = reduceLidarLearning(learningState, action, lidarLearningContent);
+    syncLearning();
+  };
+  const dispatchWeather = (action: WeatherLearningAction) => {
+    if (disposed) return;
+    weatherState = reduceWeatherLearning(weatherState, action, lidarLearningContent.weather.questions);
+    syncLearning();
+  };
+  scope.listen(window, 'pagehide', () => {
+    if (disposed) return;
+    learningState = createLidarLearningState();
+    weatherState = createWeatherLearningState();
+    selectedWorldId = null;
+    learningScanRunning = true;
+    learningOpen = false;
+    learningTab = 'guide';
+    syncLearning();
+  });
+  const chooseTarget = (id: string) => {
+    if (!displayedTargets.some((target) => target.id === id)) return;
+    if (learningTab === 'distance') dispatchLearning({ type: 'select-target', id });
+    else {
+      selectedWorldId = id;
+      syncLearning();
+    }
+  };
+  scope.listen<MouseEvent>(host, 'click', (event) => {
+    if (!(event.target instanceof Element) || disposed) return;
+    const button = event.target.closest<HTMLButtonElement>('button');
+    if (!button || !host.contains(button) || button.disabled) return;
+    if (
+      button.hasAttribute('data-lidar-learning-toggle') ||
+      button.hasAttribute('data-lidar-learning-close')
+    ) {
+      learningOpen = button.hasAttribute('data-lidar-learning-close') ? false : !learningOpen;
+      syncLearning();
+      if (learningOpen) learningHost?.scrollIntoView({ block: 'nearest' });
+      else learningToggle?.focus({ preventScroll: true });
+    } else if (button.dataset.lidarLearningTab) {
+      const tab = button.dataset.lidarLearningTab;
+      if (tab === 'guide' || tab === 'world' || tab === 'distance' || tab === 'weather') {
+        learningTab = tab;
+        syncLearning();
+      }
+    } else if (button.dataset.lidarTarget)
+      dispatchLearning({ type: 'select-target', id: button.dataset.lidarTarget });
+    else if (button.dataset.lidarRangeChoice)
+      dispatchLearning({ type: 'select-range', id: button.dataset.lidarRangeChoice });
+    else if (button.dataset.lidarSensor)
+      dispatchLearning({ type: 'select-sensor', id: button.dataset.lidarSensor });
+    else if (button.hasAttribute('data-lidar-learning-submit')) dispatchLearning({ type: 'submit' });
+    else if (button.hasAttribute('data-lidar-learning-continue')) dispatchLearning({ type: 'continue' });
+    else if (button.hasAttribute('data-lidar-distance-reset')) dispatchLearning({ type: 'reset' });
+    else if (button.dataset.lidarWeather)
+      dispatchWeather({ type: 'set-weather', weather: button.dataset.lidarWeather as LearningWeather });
+    else if (button.dataset.lidarWeatherChoice)
+      dispatchWeather({
+        type: 'answer',
+        questionId: lidarLearningContent.weather.questions[weatherState.questionIndex].id,
+        choiceId: button.dataset.lidarWeatherChoice,
+      });
+    else if (button.hasAttribute('data-lidar-weather-continue')) dispatchWeather({ type: 'continue' });
+    else if (button.hasAttribute('data-lidar-weather-reset')) dispatchWeather({ type: 'reset' });
+    else if (button.hasAttribute('data-lidar-learning-scan')) {
+      learningScanRunning = !learningScanRunning;
+      syncLearning();
+    } else if (button.dataset.lidarWorldTarget) chooseTarget(button.dataset.lidarWorldTarget);
+    else if (button.dataset.lidarSceneTarget) chooseTarget(button.dataset.lidarSceneTarget);
+  });
   const setStatus = (value: string) => {
     const prefix =
       assetStatus === 'degraded'
@@ -202,13 +386,14 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
         `${state.distanceMeters.toFixed(0)} m 模拟目标`,
       );
     }
+    syncLearningScene();
   };
   bindLidarInteraction(
     host,
     {
       camera,
       getState: () => state,
-      pickCandidates: rig.pickCandidates,
+      pickCandidates: (current) => (worldVisible ? [] : rig.pickCandidates(current)),
       onEcho: () => {
         setStatus('已选中一处模拟回波');
         updateMeasurement();
@@ -217,6 +402,36 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
     dispatch,
     scope,
   );
+  const learningRaycaster = new THREE.Raycaster();
+  let learningPointerStart: { id: number; x: number; y: number } | null = null;
+  scope.listen<PointerEvent>(canvas, 'pointerdown', (event) => {
+    if (worldVisible) learningPointerStart = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  });
+  scope.listen<PointerEvent>(canvas, 'pointercancel', () => {
+    learningPointerStart = null;
+  });
+  scope.listen<PointerEvent>(canvas, 'pointerup', (event) => {
+    const start = learningPointerStart;
+    learningPointerStart = null;
+    if (
+      !worldVisible ||
+      !start ||
+      start.id !== event.pointerId ||
+      Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6
+    )
+      return;
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    learningRaycaster.setFromCamera(
+      new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1,
+      ),
+      camera,
+    );
+    const hit = learningRaycaster.intersectObjects(learningWorld.pickCandidates(), false)[0];
+    if (typeof hit?.object.userData.targetId === 'string') chooseTarget(hit.object.userData.targetId);
+  });
 
   const resize = () => {
     const width = stage.clientWidth || 1;
@@ -246,7 +461,10 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
         if (disposed || thisLoad !== loadVersion) return;
         throw new Error('LiDAR 部分模型资源加载失败');
       }
-      rig.installLicensedParts(successes.map((part) => part.value));
+      savedCamera = installWithLearningCamera(camera, controls, worldVisible ? savedCamera : null, () => {
+        rig.installLicensedParts(successes.map((part) => part.value));
+        rig.apply(state);
+      });
       assetStatus = 'ready';
     } catch {
       if (disposed || thisLoad !== loadVersion) return;
@@ -254,8 +472,9 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
     }
     if (disposed || thisLoad !== loadVersion) return;
     host.dataset.assetStatus = assetStatus;
-    rig.apply(state);
+    if (assetStatus === 'degraded') rig.apply(state);
     showMode();
+    syncLearningScene();
   };
   void load();
 
@@ -274,9 +493,24 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
     (delta) => {
       if (disposed) return;
       controls.update();
-      dispatch({ type: 'tick', deltaSeconds: delta });
-      scanAnimation.update(state, delta);
-      rig.update(state, delta);
+      if (worldVisible) {
+        learningWorld.update(delta);
+        scene.scene.updateMatrixWorld(true);
+        learningLabels?.querySelectorAll<HTMLElement>('[data-lidar-scene-target]').forEach((label) => {
+          const point = learningWorld.getTargetPosition(label.dataset.lidarSceneTarget ?? '');
+          if (!point) return;
+          point.y += 0.22;
+          const projected = point.project(camera);
+          label.style.left = `${(projected.x + 1) * 50}%`;
+          label.style.top = `${(1 - projected.y) * 50}%`;
+          label.hidden =
+            projected.z > 1 || projected.z < -1 || Math.abs(projected.x) > 1 || Math.abs(projected.y) > 1;
+        });
+      } else {
+        dispatch({ type: 'tick', deltaSeconds: delta });
+        scanAnimation.update(state, delta);
+        rig.update(state, delta);
+      }
       renderer.render(scene.scene, camera);
     },
     (error) => reportChapterError(host, error),
@@ -288,6 +522,7 @@ function createController(host: HTMLElement, scope: ReturnType<typeof createScop
   showMode();
   announcePart();
   updateMeasurement();
+  syncLearning();
   controller.dispose = dispose;
   controller.setActive = (active) => {
     if (active) resize();

@@ -1,3 +1,5 @@
+import { lidarLearningContent } from './learning-data';
+
 export type LidarMode = 'assembly' | 'exploded' | 'cutaway';
 
 export type PartInfo = {
@@ -58,6 +60,10 @@ export const partCatalog: PartInfo[] = [
   },
 ];
 
+for (const part of partCatalog) {
+  part.copy = lidarLearningContent.parts.find((item) => item.sourcePartId === part.id)?.copy ?? part.copy;
+}
+
 export const partById = new Map(partCatalog.map((part) => [part.id, part]));
 
 export const lessonSteps = [
@@ -82,3 +88,7 @@ export const lessonSteps = [
     partId: 'lidar_encoder',
   },
 ];
+
+for (const step of lessonSteps) {
+  step.copy = lidarLearningContent.steps.find((item) => item.sourcePartId === step.partId)?.copy ?? step.copy;
+}

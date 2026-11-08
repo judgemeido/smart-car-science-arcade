@@ -1,6 +1,24 @@
 # 03 激光雷达内容与实验维护
 
-本章保留八个部件、三种观察模式、四步说明、5–80 m 滑块、720 点扫描示意以及三个真实 DAE 模型。修改入口是源码；现有页面没有新增配置或编辑功能。
+本章保留八个部件、三种观察模式、四步说明、5–80 m 滑块、720 点扫描示意以及三个真实 DAE 模型。新增传感器实验室独立管理距离判断、天气题和设备知识卡；没有后端或持久存档。
+
+## 小学高年级学习活动
+
+`learning-data.ts` 是运行时唯一的有类型学习内容源，声明 `LidarLearningContent`，复用步骤与八部件的稳定 ID，并提供六张设备卡。`docs/content/2026-11-08-upper-primary/03-lidar.json` 仅作为准备内容参考，不被运行时代码导入。GNSS 帮助定位，不能据此识别行人或路障。步骤的 1.3 秒演示节奏与 `measurement.ts` 的光往返时间计算保持独立。
+
+`learning-measurement.ts` 用内容包的距离在 -20/0/+20 度生成米制目标坐标；传感器原点为 `{x:0,y:0,z:0}`，距离是原点到目标底部参考标记的三维直线距离。仅消除小于显示精度的三角函数舍入误差，避免20米边界误入第二档。三轮分别是 `5/12/20`、`18/7/25`、`22/30/12` 米，最近目标按稳定 ID 分别是 A/B/C。区间为 `[0,10)`、`[10,20)`、`[20,40]`。原始答案在数据准备时校验一致性，判题仍由生成坐标计算，不靠按钮顺序或画面大小。
+
+`learning-state.ts` 保存目标/区间选择、提交揭示、每次实际尝试和掌握轮次。无效或不完整选择不能提交；错误后纠正，答对后主动继续；重复继续不能跳过下一轮。`weather-state.ts` 消费共享 `ChoiceQuestion/evaluateChoice`，保存天气、真实作答和掌握题 ID；正确反馈读完后使用 `continue` 推进，切天气本身不计为掌握。
+
+`learning-world.ts` 是独立 Three.js 场景组，汽车、行人、树和路障都是教学几何。点云与网格共享几何与局部位置；米制坐标在父组中统一按0.09显示缩放，缩放不进入测距。天气使用确定性雨散点和点材质中的固定筛选示意，切换正常/雨/雾不改变目标位置。不显示识别率或设备性能百分比；图形不是自动识别结果。替换目标先释放旧资源，最终 scope 清理将独立组从场景移除并释放几何/材质。
+
+`learning-view.ts` 提供实验引导、四目标列表、三轮判断、三道天气题和记录。原理对照调用原测距函数，20/60米分别约133.4/400.3 ns。提交前练习区域只显示目标标签和区间；提交后揭示测量。列表、画面标签和场景拾取都发送相同目标 ID，原生按钮支持键盘与触屏。记录显示实际选择和题目解释，不生成学生未输入的个人理由。
+
+`controller.ts` 用原渲染循环驱动独立教学场景；进入教学世界时暂停原实验的 tick 并保存相机，关闭/回到原理引导时恢复原视图及原扫描状态。新任务重置不调用旧 `reduceExperiment`。普通切章 `setActive(false)` 保留新状态并停帧；`pagehide`（包括 BFCache 的 persisted 页面退出）清空新记录并关闭学习场景，原距离/步骤不被重置。刷新、控制器重建或页面退出后学习记录重新开始。
+
+`learning-camera.ts` 协调异步真实模型安装和教学视图的共享相机。若教学活动已打开，安装期间暂时恢复原相机约束，让原模型完成归一化、视角拟合与 `controls.saveState()`；随后记录新拟合的原视图并立即恢复当前教学位置、目标点、near/far和zoom。退出教学时恢复这个新拟合快照，不能恢复载入前的过时快照。安装异常也通过 `finally` 恢复教学相机；还原时不额外消费 OrbitControls 阻尼帧。
+
+主入口 `[data-lidar-learning-toggle]`；实验切换 `[data-lidar-learning-tab="guide|world|distance|weather"]`；距离目标 `[data-lidar-target="稳定ID"]` 和区间 `[data-lidar-range-choice="稳定ID"]`；提交/继续 `[data-lidar-learning-submit]` / `[data-lidar-learning-continue]`；天气 `[data-lidar-weather="normal|rain|fog"]`、选项 `[data-lidar-weather-choice="稳定ID"]` 和继续 `[data-lidar-weather-continue]`；设备卡 `[data-lidar-sensor="稳定ID"]`；记录 `[data-lidar-learning-record]`。
 
 ## 内容与固定文案
 
@@ -8,7 +26,7 @@
 - `src/chapters/lidar/view.ts`：固定 HTML 模板 `view` 承载标题、模式按钮、滑块及刻度、步骤按钮的短名称、交互提示、设备参数与许可链接。步骤按钮的“发射 / 反射 / 接收 / 成点云”与 `lessonSteps.title` 是不同位置的文案。
 - `src/chapters/lidar/controller.ts`：`announcePart` 的未选中说明、`showMode` / `showScan` / `showLessonStatus` / `showScanStatus` 的动态状态、`setStatus` 的加载或降级前缀及 `updateMeasurement` 的测量格式。模型状态由独立的 `assetStatus` 保留，切换模式或扫描不清除降级前缀。
 
-例如要修改已有“收回回波”步骤的解释，仅在 `data.ts` 中编辑现有对象的 `copy`：
+低龄化后的部件/步骤 `copy` 从 `learning-data.ts` 覆盖到原 catalog；修改时编辑该文件对应 `sourcePartId` 的文案。以下是旧步骤对象的结构，`partId` 和顺序继续保持：
 
 ```ts
 {
@@ -69,7 +87,7 @@
 ## 修改后的检查
 
 1. `npm run test:unit -- tests/unit/lidar` 验证测量、范围、1.3 s 边界、手选保持、扫描重启和重置保留距离，并验证输入和真实 Three.js 场景映射。
-2. 集成时运行 `npm run build`，再运行 `npm run test:e2e -- lidar-domain`。独立 spec 是 `tests/e2e/lidar-domain.spec.ts`，覆盖模式、模型拾取、60 m / 400.3 ns、手选与扫描重启、重置清空选择并恢复实际渲染相机矩阵、切 history 暂停和缺 DAE 的持续降级提示。相机通过Three原有devtools事件观察，避免依赖可能被着色器优化掉的uniform。
+2. 集成时运行 `npm run build`，再运行 `npm run test:e2e -- tests/e2e/lidar-learning.spec.ts tests/e2e/lidar-domain.spec.ts`。新 spec 覆盖引导/卡片、先判断后揭示、三轮纠错、天气同布局、键盘继续、新扫描暂停/后台恢复、原扫描恢复、BFCache 重置、模型失败。旧 spec 继续覆盖模式、模型拾取、60 m / 400.3 ns、手选与扫描重启、重置清空选择并恢复实际渲染相机矩阵、切 history 暂停和缺 DAE 的持续降级提示。渲染状态通过Three原有devtools事件观察。
 3. 既有 `tests/e2e/chapters.spec.ts` 与兼容测试继续验证导航、后台绘制停止、资源释放、重试与旧可调用 disposer。完整检查由集成负责人统一执行，章内实施不并行运行共享构建或浏览器测试。
 
-不需要新增任务、课程或游戏情境来使用该指引。
+这些固定数据属于教学模型验证；后续随机题目、连胜奖励和真实设备性能比较不在本期范围。
