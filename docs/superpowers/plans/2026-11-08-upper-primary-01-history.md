@@ -10,6 +10,8 @@
 
 **Spec:** [新设计第 4 节](../specs/2026-11-08-upper-primary-learning-design.md#4-01-认识汽车)。
 
+**Status:** 本章已实现，通过章内独立审查和实际浏览器回归；本地提交由集成负责人保存。浏览器用例在界面接入前编写，浏览器 RED 按并行构建隔离裁定省略；单元 RED/GREEN 和浏览器 GREEN 证据见 [实施记录](../../engineering/upper-primary-learning-progress.md)。
+
 ## Global Constraints
 
 [总 Plan 的全部约束](./2026-11-08-upper-primary-learning-plan.md#global-constraints) 逐条适用；01 不改展品史料、图片授权和原年份定位。任务结果仅在当前控制器内存中保留。
@@ -27,11 +29,11 @@
 
 **Interfaces:** Consumes S0 的 `ChoiceQuestion`。Produces `historyLearningContent: HistoryLearningContent` 与 `renderHistoryReading(host: HTMLElement, content: HistoryLearningContent): void`。内容类型含 `studentCopy/contextCards/orderActivity/matchQuestions/futureActivity`，按 [01 内容包](../../content/2026-11-08-upper-primary/01-history.json) 转换，展品用 `sourceExhibitId` 引用原数据。
 
-- [ ] 在浏览器测试添加学习入口开关及焦点断言：打开后能读主题卡，关闭后焦点返回入口；`expect(page.locator('[data-archive-article]')).toHaveCount(14)` 仍通过。
-- [ ] 构建并运行 `npm run test:e2e -- tests/e2e/history-learning.spec.ts`，确认新入口尚不存在时失败。
-- [ ] 建立有类型的教学数据与阅读区；保留原展厅版式，新增区域沿用原样式与字号规则，不往学生页放维护文档。
-- [ ] 使用 host 内查询和 scope 绑定开关，接入章首/过渡文案；普通切章保持阅读状态。
-- [ ] 重跑构建及该 E2E，确认通过；核对原 `history-domain.spec.ts`，更新章内指南与实施记录。
+- [x] 在浏览器测试添加学习入口开关及焦点断言：打开后能读主题卡，关闭后焦点返回入口；`expect(page.locator('[data-archive-article]')).toHaveCount(14)` 仍通过。
+- 浏览器 RED 本次省略：四章并行编辑期间不共用构建输出，最终由负责人串行构建和验收；没有将未执行的 RED 记作通过。
+- [x] 建立有类型的教学数据与阅读区；保留原展厅版式，新增区域沿用原样式与字号规则，不往学生页放维护文档。
+- [x] 使用 host 内查询和 scope 绑定开关，接入章首/过渡文案；普通切章保持阅读状态。
+- [x] 重跑构建及该 E2E，确认通过；核对原 `history-domain.spec.ts`，更新章内指南与实施记录。
 
 ## Task H2 / P2：三个任务与知识卡
 
@@ -45,18 +47,18 @@
 - `HistoryLearningAction` 为 `move {cardId,toIndex}`、`submit-order`、`answer {questionId,choiceId}`、`choose-future {choiceId}`、`edit-reason {value}`、`submit-future`、`reset`。
 - Produces `countReasonCharacters(value: string): number` 与 `renderHistoryLearning(host: HTMLElement, state: HistoryLearningState, content: HistoryLearningContent): void`；界面不另外维护是否完成。
 
-- [ ] 写失败测试：完整正确顺序接受；重复卡/未知卡/负位置不接受；未提交不能完成。断言 `expect(countReasonCharacters('  汽车🚗  ')).toBe(3)`，9/121 字拒绝，10/120 字接受；无效未来 ID 拒绝。
-- [ ] 增加测试：三题纠错后各记录一次掌握；重复提交不重复完成；编辑已确认理由/排序撤销对应确认；未来任一有效选择都可完成，不对观点评分。
-- [ ] 运行 `npm run test:unit -- tests/unit/history/learning-state.test.ts`，确认新接口未实现导致失败。
-- [ ] 实现上述纯状态接口。固定初始顺序为 2020、2001、2026.03、2009、2015—2016，使用各卡 ID 表达；不让活动初始状态已经正确排好。排序判定读取内容的 correctOrder。
-- [ ] 在学习区接入拖动与“选卡片→选位置”操作，题目提交、纠错与主动继续；理由在组合输入结束后提交，输出用 textContent。成果卡读取已确认状态，原年份按钮仍有效。
-- [ ] 追加 E2E：键盘排序；移动端选择位置；输入 `<img src=x onerror=alert(1)>` 只显示文本；普通切章返回草稿保留；刷新重置；重置学习任务不改变展品位置。未知 ID 与连续点击不越过未完成任务。
-- [ ] 运行该单元测试，`npm run build`，`npm run test:e2e -- tests/e2e/history-learning.spec.ts tests/e2e/history-domain.spec.ts`；确认新任务与旧展品都通过，再记录交付。
+- [x] 写失败测试：完整正确顺序接受；重复卡/未知卡/负位置不接受；未提交不能完成。断言 `expect(countReasonCharacters('  汽车🚗  ')).toBe(3)`，9/121 字拒绝，10/120 字接受；无效未来 ID 拒绝。
+- [x] 增加测试：三题纠错后各记录一次掌握；重复提交不重复完成；编辑已确认理由/排序撤销对应确认；未来任一有效选择都可完成，不对观点评分。
+- [x] 运行 `npm run test:unit -- tests/unit/history/learning-state.test.ts`，确认新接口未实现导致失败。
+- [x] 实现上述纯状态接口。固定初始顺序为 2020、2001、2026.03、2009、2015—2016，使用各卡 ID 表达；不让活动初始状态已经正确排好。排序判定读取内容的 correctOrder。
+- [x] 在学习区接入拖动与“选卡片→选位置”操作，题目提交、纠错与主动继续；理由在组合输入结束后提交，输出用 textContent。成果卡读取已确认状态，原年份按钮仍有效。
+- [x] 追加 E2E：键盘排序；移动端选择位置；输入 `<img src=x onerror=alert(1)>` 只显示文本；普通切章返回草稿保留；刷新重置；重置学习任务不改变展品位置。未知 ID 与连续点击不越过未完成任务。
+- [x] 运行该单元测试，`npm run build`，`npm run test:e2e -- tests/e2e/history-learning.spec.ts tests/e2e/history-domain.spec.ts`；确认新任务与旧展品都通过，再记录交付。
 
 ## 01 完成条件
 
-- [ ] 原 14 展品与图片说明完整，所有教学展品引用存在。
-- [ ] 三个新任务可用键盘和触屏完成，未满足条件时不显示完成卡。
-- [ ] 教学文案、规则、界面位置已写入 history 指南，修改题目无需改原模型或导航。
+- [x] 原 14 展品与图片说明完整，所有教学展品引用存在。
+- [x] 三个新任务可用键盘和触屏完成，未满足条件时不显示完成卡。
+- [x] 教学文案、规则、界面位置已写入 history 指南，修改题目无需改原模型或导航。
 
-本计划只实施 01；公共文件归集成负责人。未获得实施指令前保持所有任务未勾选，不自动提交。
+本计划只实施 01；用户已授权并行实施与逐章本地提交，公共文件和 Git 索引归集成负责人。

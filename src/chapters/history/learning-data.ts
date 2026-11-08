@@ -1,0 +1,206 @@
+import type { ChoiceQuestion } from '../../shared/learning-assessment';
+
+export interface HistoryLearningContent {
+  readonly title: string;
+  readonly studentCopy: { readonly intro: string; readonly bridge: string; readonly completion: string };
+  readonly contextCards: readonly {
+    readonly id: string;
+    readonly title: string;
+    readonly copy: string;
+    readonly note?: string;
+    readonly role?: string;
+    readonly sourceExhibitIds?: readonly string[];
+  }[];
+  readonly orderActivity: {
+    readonly id: string;
+    readonly title: string;
+    readonly prompt: string;
+    readonly cards: readonly {
+      readonly id: string;
+      readonly year: string;
+      readonly label: string;
+      readonly sourceExhibitId: string;
+    }[];
+    readonly initialOrder: readonly string[];
+    readonly correctOrder: readonly string[];
+    readonly correctFeedback: string;
+    readonly retryFeedback: string;
+  };
+  readonly matchTitle: string;
+  readonly matchQuestions: readonly ChoiceQuestion[];
+  readonly futureActivity: {
+    readonly id: string;
+    readonly title: string;
+    readonly prompt: string;
+    readonly choices: readonly { readonly id: string; readonly label: string }[];
+    readonly response: {
+      readonly minCharacters: number;
+      readonly maxCharacters: number;
+      readonly trimWhitespace: boolean;
+      readonly prompt: string;
+      readonly sample: string;
+    };
+    readonly feedback: string;
+  };
+  readonly outcomeCard: { readonly title: string; readonly fields: readonly string[] };
+}
+
+/** Teaching copy adapted from docs/content/2026-11-08-upper-primary/01-history.json. */
+export const historyLearningContent: HistoryLearningContent = {
+  title: '认识汽车：汽车为什么不断进化？',
+  studentCopy: {
+    intro: '你是汽车进化研究员。逛一逛展品，找出汽车怎样变得更方便、更节能、更安全。',
+    bridge: '汽车能跑起来，还不够。下一站，看看它的动力、结构和感知设备怎样配合。',
+    completion: '我能用一个事件说明：汽车的变化与人们的生活需要有关。',
+  },
+  contextCards: [
+    {
+      id: 'history-origin',
+      title: '让车自己动起来',
+      copy: '早期汽车把发动机装到车上，让车辆不只依靠人力和畜力。它解决了怎样让车获得动力的问题。',
+      role: '补充阅读，不列入中国新能源展品年代排序',
+    },
+    {
+      id: 'history-production',
+      title: '让更多人用得上',
+      copy: '把制造工作分成连续步骤，可以让汽车生产得更有条理。汽车进入更多家庭，也离不开价格、道路和使用条件的改善。',
+      role: '补充阅读，不声称某一年汽车已普及',
+    },
+    {
+      id: 'history-energy',
+      title: '探索新的能源方式',
+      copy: '纯电动车用电池和电机行驶；混合动力车结合不同动力来源；氢燃料电池车用燃料电池发电，再由电机驱动。它们的补能方式和适用条件并不相同。',
+      note: '纯电动车行驶时没有尾气，但发电和电池制造也会影响环境。',
+    },
+    {
+      id: 'history-sensing',
+      title: '让车更会观察',
+      copy: '摄像头和雷达等设备收集道路信息，计算系统帮助分析。电动化与智能化可以一起发展，不是前一种技术结束后才出现后一种。',
+      sourceExhibitIds: ['archive-2015', 'archive-today-sensing'],
+    },
+    {
+      id: 'history-future',
+      title: '把安全放在前面',
+      copy: '未来汽车可能更聪明、更方便。我们也要问：它能不能可靠地工作，能不能照顾不同人的需要？',
+      sourceExhibitIds: ['archive-future'],
+    },
+  ],
+  orderActivity: {
+    id: 'history-event-order',
+    title: '任务A：给汽车进化事件排队',
+    prompt: '阅读五张卡片，把它们按时间从早到晚排列。可以拖动，也可以先选卡片，再选位置。',
+    cards: [
+      {
+        id: 'history-event-2001',
+        year: '2001',
+        label: '一起研究电池、电机和电控',
+        sourceExhibitId: 'archive-2001',
+      },
+      {
+        id: 'history-event-2009',
+        year: '2009',
+        label: '让新能源车在城市里试着运行',
+        sourceExhibitId: 'archive-2009',
+      },
+      {
+        id: 'history-event-2015',
+        year: '2015—2016',
+        label: '在测试道路研究汽车怎样观察环境',
+        sourceExhibitId: 'archive-2015',
+      },
+      {
+        id: 'history-event-2020',
+        year: '2020',
+        label: '发展充电设施和汽车联网功能',
+        sourceExhibitId: 'archive-2020',
+      },
+      {
+        id: 'history-event-2026',
+        year: '2026.03',
+        label: '发布新的电池与闪充技术',
+        sourceExhibitId: 'archive-2026-blade',
+      },
+    ],
+    initialOrder: [
+      'history-event-2020',
+      'history-event-2001',
+      'history-event-2026',
+      'history-event-2009',
+      'history-event-2015',
+    ],
+    correctOrder: [
+      'history-event-2001',
+      'history-event-2009',
+      'history-event-2015',
+      'history-event-2020',
+      'history-event-2026',
+    ],
+    correctFeedback: '排好了！从研究、示范运行到感知测试和补能发展，汽车的进步需要许多人一起努力。',
+    retryFeedback: '先看年份，再看事件内容。还没排对的卡片可以重新放，展品资料也能帮你。',
+  },
+  matchTitle: '任务B：汽车为什么要改变？',
+  matchQuestions: [
+    {
+      id: 'history-efficiency',
+      kind: 'single-choice',
+      prompt: '越来越多的人需要汽车，怎样让制造更有条理？',
+      choices: [
+        { id: 'history-efficiency:choice-1', label: '把生产分成连续步骤，让不同工序配合' },
+        { id: 'history-efficiency:choice-2', label: '只把车灯做得更亮' },
+        { id: 'history-efficiency:choice-3', label: '只增加汽车颜色' },
+      ],
+      correctChoiceId: 'history-efficiency:choice-1',
+      correctFeedback: '生产工序配合，可以提高制造效率。',
+      retryFeedback: '想一想：哪个办法直接改变了制造汽车的过程？',
+    },
+    {
+      id: 'history-cleaner-energy',
+      kind: 'single-choice',
+      prompt: '人们希望探索新的动力来源，哪一组变化与这个目标有关？',
+      choices: [
+        { id: 'history-cleaner-energy:choice-1', label: '增加座椅花纹' },
+        { id: 'history-cleaner-energy:choice-2', label: '发展纯电动、混合动力和氢燃料电池等方案' },
+        { id: 'history-cleaner-energy:choice-3', label: '把车门做得更大' },
+      ],
+      correctChoiceId: 'history-cleaner-energy:choice-2',
+      correctFeedback: '这些方案改变了车辆获得和使用能量的方式。还要考虑能源来源、制造和使用条件。',
+      retryFeedback: '找一找：哪个选项与汽车使用什么能量有关？',
+    },
+    {
+      id: 'history-complex-road',
+      kind: 'single-choice',
+      prompt: '道路上有行人、车辆和标志，什么能帮助汽车收集环境信息？',
+      choices: [
+        { id: 'history-complex-road:choice-1', label: '只增加行李箱空间' },
+        { id: 'history-complex-road:choice-2', label: '只更换车身颜色' },
+        { id: 'history-complex-road:choice-3', label: '摄像头、雷达等设备与计算系统配合' },
+      ],
+      correctChoiceId: 'history-complex-road:choice-3',
+      correctFeedback: '设备先收集信息，计算系统再帮助分析。发现风险后，还需要合适的行动。',
+      retryFeedback: '想一想：哪一组设备在观察道路？',
+    },
+  ],
+  futureActivity: {
+    id: 'history-future-choice',
+    title: '任务C：我重视的未来汽车技术',
+    prompt: '从下面选一项你最重视的能力，再说说它能帮助谁、解决什么问题。',
+    choices: [
+      { id: 'future-safety', label: '更可靠地发现道路风险' },
+      { id: 'future-energy', label: '更方便地补充能源' },
+      { id: 'future-accessibility', label: '让不同需要的人更方便地乘车' },
+      { id: 'future-comfort', label: '让乘坐更舒适' },
+    ],
+    response: {
+      minCharacters: 10,
+      maxCharacters: 120,
+      trimWhitespace: true,
+      prompt: '我选择……，因为它可以帮助……。',
+      sample: '我选择更可靠地发现道路风险，因为学校附近有很多行人，汽车需要提前发现他们。',
+    },
+    feedback: '你的理由已写好。和同学比较一下：你们关心的问题一样吗？',
+  },
+  outcomeCard: {
+    title: '汽车进化知识卡',
+    fields: ['我排好的五个事件', '我能解释的一项技术变化', '我的未来技术选择和理由'],
+  },
+};
