@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { fallbackExplodeVectors, partCategoryForName, type PartCategory } from './data';
 import type { createScene } from './scene';
 import type { createScope } from '../../shared/lifecycle';
+import { teachingAssemblyGroups, type AssemblyReturnState } from './assembly-state';
 
 /** Owns authored vehicle transforms; DOM and mission progress stay in the controller. */
 export function createVehicleRig(
@@ -31,6 +32,7 @@ export function createVehicleRig(
   let assemblyRoot: THREE.Object3D | null = null;
   let explosionProgress = 0;
   let explosionTarget = 0;
+  let teachingAssembly: AssemblyReturnState | null = null;
   const applyBlackVehicleFinish = (material: THREE.Material) => {
     if (material.name.toLowerCase() !== 'paint_multicoat') return;
     if (!(material instanceof THREE.MeshPhysicalMaterial)) return;
@@ -149,8 +151,30 @@ export function createVehicleRig(
   };
 
   const updateExplosion = (deltaSeconds: number) => {
+    if (teachingAssembly) return;
     explosionProgress = THREE.MathUtils.damp(explosionProgress, explosionTarget, 5.5, deltaSeconds);
     setExplosionProgress(explosionProgress);
+  };
+
+  const setTeachingAssemblyProgress = (state: AssemblyReturnState) => {
+    teachingAssembly = state;
+    roadSurface.visible = false;
+    explosionRigs.forEach((rig) => {
+      const group = teachingAssemblyGroups.find((item) => item.names.includes(rig.key));
+      const progress =
+        !group || state.returnedGroups.includes(group.id)
+          ? 0
+          : state.currentGroup === group.id
+            ? 1 - state.progress
+            : 1;
+      rig.node.position.copy(rig.basePosition).addScaledVector(rig.offset, progress);
+    });
+    assemblyRoot?.updateMatrixWorld(true);
+  };
+  const clearTeachingAssembly = () => {
+    teachingAssembly = null;
+    setExplosionProgress(explosionProgress);
+    roadSurface.visible = explosionTarget < 0.5;
   };
 
   const prepareModel = (root: THREE.Object3D) => {
@@ -215,6 +239,7 @@ export function createVehicleRig(
     tailgateRig = null;
     assemblyRoot = null;
     modelRoot = null;
+    teachingAssembly = null;
   });
   return {
     materialCache,
@@ -228,6 +253,8 @@ export function createVehicleRig(
     prepareModel,
     prepareExplosionRigs,
     applyPartFilter,
+    setTeachingAssemblyProgress,
+    clearTeachingAssembly,
     toggleDoors() {
       doorsOpenTarget = doorsOpenTarget > 0.5 ? 0 : 1;
       return doorsOpenTarget > 0.5;
@@ -242,6 +269,7 @@ export function createVehicleRig(
       return lightsOn;
     },
     setExploded(open: boolean) {
+      if (!open && teachingAssembly?.status === 'complete') explosionProgress = 0;
       explosionTarget = open ? 1 : 0;
       roadSurface.visible = !open;
     },

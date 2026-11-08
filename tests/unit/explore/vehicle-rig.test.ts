@@ -3,6 +3,11 @@ import * as THREE from 'three';
 import { createScope } from '../../../src/shared/lifecycle';
 import type { createScene } from '../../../src/chapters/explore/scene';
 import { createVehicleRig } from '../../../src/chapters/explore/vehicle-rig';
+import {
+  createAssemblyReturnState,
+  reduceAssemblyReturn,
+  stepAssemblyReturn,
+} from '../../../src/chapters/explore/assembly-state';
 
 it('keeps authored door, tailgate, light and explosion transforms', () => {
   const scene = new THREE.Scene();
@@ -48,5 +53,45 @@ it('keeps authored door, tailgate, light and explosion transforms', () => {
   expect(nodes[3].position.y).toBeCloseTo(0, 3);
   expect(rig.toggleLights()).toBe(false);
   expect(nodes[0].material.emissiveIntensity).toBe(0.06);
+  scope.dispose();
+});
+
+it('pauses global explosion writes during teaching and restores cancellation exactly', () => {
+  const scene = new THREE.Scene();
+  const roadSurface = new THREE.Group();
+  const scope = createScope();
+  const rig = createVehicleRig({ scene, roadSurface } as ReturnType<typeof createScene>, scope);
+  const root = new THREE.Group();
+  const assembly = new THREE.Group();
+  assembly.name = 'EV_SUV';
+  root.add(assembly);
+  const wheel = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial());
+  wheel.name = 'Wheel_FL';
+  assembly.add(wheel);
+  rig.prepareModel(root);
+  rig.prepareExplosionRigs();
+  rig.setExploded(true);
+  rig.update(0.2);
+  const before = wheel.position.clone();
+  const state = stepAssemblyReturn(reduceAssemblyReturn(createAssemblyReturnState(), 'next'), 0.5);
+  rig.setTeachingAssemblyProgress(state);
+  const half = wheel.position.clone();
+  rig.update(2);
+  expect(wheel.position.toArray()).toEqual(half.toArray());
+  rig.clearTeachingAssembly();
+  expect(wheel.position.toArray()).toEqual(before.toArray());
+  expect(rig.explosionTarget).toBe(1);
+  let complete = state;
+  complete = stepAssemblyReturn(complete, 0.5);
+  for (let i = 0; i < 3; i++) complete = stepAssemblyReturn(reduceAssemblyReturn(complete, 'next'), 1);
+  rig.setTeachingAssemblyProgress(complete);
+  rig.setExploded(false);
+  rig.clearTeachingAssembly();
+  rig.update(0.1);
+  expect(wheel.position.toArray()).toEqual([0, 0, 0]);
+  expect(roadSurface.visible).toBe(true);
+  rig.setExploded(true);
+  rig.update(2);
+  expect(wheel.position.length()).toBeGreaterThan(0);
   scope.dispose();
 });

@@ -49,6 +49,15 @@ export const view = `
             <h2>把车身打开，<br /><em>看见它如何感知。</em></h2>
             <p>曜境 S9 是一个结构概念模型。选择一个系统，观察它在整车中的位置与作用。</p>
           </div>
+          <section class="explore-learning-launch" aria-label="汽车结构学习">
+            <p>你是汽车结构调查员。先找部件，再解释作用。找错也没关系，观察位置和提示后再试。</p>
+            <button type="button" data-learning-start>开始结构挑战 · 13 项探索</button>
+            <button type="button" data-assembly-open>把结构放回去 · 四步演示</button>
+            <button type="button" data-explore-review-open hidden>复习三组系统的功能</button>
+          </section>
+          <section class="explore-learning-card" data-explore-learning hidden aria-label="汽车结构挑战"></section>
+          <section class="explore-learning-card" data-explore-review hidden aria-label="三组系统功能复习"></section>
+          <section class="explore-learning-card" data-explore-assembly hidden aria-label="分组归位教学演示"></section>
           <div class="explore-controls" role="tablist" aria-label="模型结构模块">
             <button class="explore-control is-active" type="button" data-focus="all" role="tab" aria-selected="true"><span>01</span><strong>整车</strong><small>完整结构</small></button>
             <button class="explore-control" type="button" data-focus="battery" role="tab" aria-selected="false"><span>02</span><strong>电池系统</strong><small>能量底座</small></button>

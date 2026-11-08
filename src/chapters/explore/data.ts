@@ -279,6 +279,6 @@ export const powerflowStages = [
     at: 3.45,
     step: '04 / ADAS SENSING',
     title: '出发前，先看清周围',
-    copy: '摄像头、雷达与激光雷达发出探测信号，观察道路和目标。',
+    copy: '摄像头接收道路图像，雷达和激光雷达主动探测；不同设备把信息交给计算系统。',
   },
 ];
