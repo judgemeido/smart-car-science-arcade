@@ -4,23 +4,23 @@
 
 **Goal:** 为小学三至六年级新增独立二维结构游戏页，通过诊断教学剖面、补装部件、连接系统关系，让学生看见汽车的运动、支撑与感知需要不同部件配合。
 
-**Architecture:** 02顶部导航两个同级子按钮：“拆解与交互”→`#explore`、“结构挑战”→`#structure-lab`。点击替换整个主内容，任意时刻恰好一个页面可见且active。结构挑战不是3D左侧+2D右侧、章内手风琴内容、弹窗或模型下方追加区。`src/activities/structure-lab/` 导出 `view: string` / `mount(host: HTMLElement): ChapterController`，独立host不继承explore-workbench/model-canvas、不加载GLB；控制器创建页面拥有的共享ArcadeSession。旧3D页保留自己的交互/归位/复习；新页13主题的图示ID与模型目标分开，运行由共享arcade负责。
+**Architecture:** 真正的Vite多页面：顶部“拆解与交互”导航 `/index.html#explore`，“结构挑战”导航 `/games/structure/index.html`；点击按钮加载新HTML文档。`games/structure/index.html` + `src/activities/structure-lab/main.ts` 专用bootstrap只挂载本游戏view/mount和共同游戏导航，不加载旧app host/GLB/workbench/model-canvas；不是单SPA内隐藏多页、并排/弹窗/模型下方追加区。activityId `structure-lab` 只是计分ID，不是路由。旧3D自己的控制/复习/归位保留。
 
 **Tech Stack:** TypeScript 5.7、原生 DOM、SVG/CSS、Vite 6、Vitest 4、Playwright 1.56；新页不引入 Three.js、模型资源、联网 AI、后端或额外 UI 框架。
 
-**Spec:** [科学游戏总设计](../specs/2026-11-08-science-arcade-design.md)。既有知识与模型事实依据 `docs/development/explore-content.md`、`docs/superpowers/specs/2026-11-08-upper-primary-learning-design.md`。
+**Spec:** [独立科普游戏总计划（含设计）](2026-11-08-independent-science-games-plan.md)。既有知识与模型事实依据 `docs/development/explore-content.md`。
 
 **Status:** 计划未实施；内容目录、route、运行接口、计分和生命周期合同已锁定。360 秒为设计默认值，实际儿童可用性评估后再统一调整版本及比较键。
 
 ## Global Constraints
 
-- 用户修正优先：02通过顶部两个同级子按钮切换独立页面，标签/路由固定为“拆解与交互”`#explore`、“结构挑战”`#structure-lab`。每次切换整个主内容，只允许1个可见active页面；全局导航/注册实施由GPT-6.1-sol集成代理承担。
-- 玩法、教程、HUD、反馈和结果只存在于structure-lab独立host；旧3D主区、aside、弹窗、模型下方均不保留挑战启动器或面板。隐藏的另页必须inert，不能接收鼠标/键盘；缓存其状态不等于一起展示。
+- 用户修正优先：02顶部两个按钮是真实页面导航：“拆解与交互”href=/index.html#explore，“结构挑战”href=/games/structure/index.html。点击加载各自HTML文档，不在旧app里切隐藏host；所有实施由GPT-6.1-sol集成代理承担。
+- 游戏玩法/教程/HUD/results只在结构游戏独立HTML的host中；旧/index.html文档不挂载该游戏或挑战入口面板。不存在另一个隐藏游戏host可激活；旧aside/弹窗/模型下方无挑战启动器。
 - 两个机制足够：二维剖面诊断/装配、系统关系连接；不再新增第三套选择测验、驾驶模拟或经营系统。
 - 全部页面正文最小18px；任务、部件功能、资料反馈与结果说明均适用，窄屏通过换行布局适配。
 - 比赛默认360秒，教程在计时之外；同样台面可自由练习，练习不计时、不写正式比较记录。时长待真实儿童可用性评估统一调整，当前读取共享配置360000ms。
 - `guided`“带提示” / `standard`“标准挑战”分别适合需要更多引导/更独立的学生；不推断年级，不因年龄硬性禁用；相同真值表、操作和权重，比较键包含档位。
-- 后台、hidden、导航继续单调比赛时钟；切页保留 mounted run，setActive 只控制输入。刷新与页面退出把 active run 关闭为 interrupted/unranked，不恢复比赛。
+- 浏览器hidden/后台继续单调比赛时钟；按钮导航到另一HTML、刷新和pagehide（包括BFCache persisted=true）结束正式run为interrupted/unranked。返回该页从ready开始，不恢复正式比赛；练习草稿仅当前document内有效。
 - 13 个旧主题全部映射，但结果表述是“教学图示中完成”，不能叫“在实际 GLB 找到 13 个零件”或真实维修能力认证。
 - 毫米波雷达没有原 GLB 独立节点，始终标“教学示意”；底盘是组合系统，至少包含悬架和制动，不能画成一个虚构单件。
 - 关系图用来解释功能，不是高压接线图、维修手册或特定量产车配置。位置与表现是教学示意，不能据此认定真实车型配置。
@@ -50,11 +50,11 @@
 | `powerflow-state.ts`、`data.ts` 的 `powerflowStages` | 0、1.2、2.55、3.45 秒四阶段，5 秒原动力故事 | 原故事完整保留；新 SVG 试运行是独立说明，不复用故事时钟 |
 | `docs/development/explore-content.md` | 说明 source、节点、pagehide、切章、归位等维护事实 | 追加独立页和 canonical 内容维护说明，继续保留模型维护限制 |
 
-旧`#explore`整页删除13项挑战启动器、面板、输入挂载，包括view.ts的`data-learning-start`、`data-explore-learning`，旧aside不留挑战链接。新游戏只通过02顶部“结构挑战”或直接`#structure-lab`进入；“拆解与交互”返回完整3D页。两者替换主内容，不能一起显示。原三步、复习、四步归位和3D自己的控制保留；复习引用canonical对象，不写比赛事件。旧13项规则测试保留，旧learning E2E调整为独立路由/保留功能回归。
+旧`/index.html#explore`整页删除13项挑战启动器、面板、输入挂载，包括view.ts的`data-learning-start`、`data-explore-learning`，旧aside不留挑战链接。新游戏只通过02顶部“结构挑战”或直接`/games/structure/index.html`进入；“拆解与交互”返回完整3D页。两者替换主内容，不能一起显示。原三步、复习、四步归位和3D自己的控制保留；复习引用canonical对象，不写比赛事件。旧13项规则测试保留，旧learning E2E调整为独立路由/保留功能回归。
 
 ## 三张台面与实际操作
 
-在`#structure-lab`独立host内部，HUD显示三组进度/计时，台面是二维教学剖面，辅助小窗也是二维俯视图，右侧为部件卡/提示，底部“试运行”“连接系统关系”。这段左右布局只属于独立2D游戏，绝不与旧3D模型并排。移动端托盘在图下。02两个页面切换按钮位于主内容之外；新页不含explore-workbench/model-canvas/GLB，教程和结果也只在新host。
+在`/games/structure/index.html`独立host内部，HUD显示三组进度/计时，台面是二维教学剖面，辅助小窗也是二维俯视图，右侧为部件卡/提示，底部“试运行”“连接系统关系”。这段左右布局只属于独立2D游戏，绝不与旧3D模型并排。移动端托盘在图下。02两个页面切换按钮位于主内容之外；新页不含explore-workbench/model-canvas/GLB，教程和结果也只在新host。
 
 ### 机制 1：看缺失现象，选择部件并安装
 
@@ -131,7 +131,7 @@ state 包含 config、stage、boardId、installedBySocket、edgesByBoard、selec
 - 允许一条 source 多个 target，但禁止完全重复的 `(source,target,relation)` 边；未知端口/类别、同端口自连、跨 board 连线、完成后的编辑无效。
 - 比赛与练习的当前run中，已完成目标一律只读，可回看此前反馈；修改已完成件/关系必须开始全新一轮，不提供单目标 uncompletion 或撤回事实。
 - `reset-practice` 重置整轮而非本组：若旧practice session仍running，先 `session.finish('abandoned')`，再 `createStructureLabState` 清空所有组的目标/件/关系，调用 `session.start(practice config)` 开始零目标新run。旧session已结束时不重复finish；score/elapsedMs继续为null。正式再赛也必须另开新run。
-- reducer 不读 DOM、Three、时间或 localStorage；主关卡输入同时要求页面 active 与 session running。inactive 只停止输入，不暂停比赛时钟；dispose 解除监听和订阅，并调用共享 session.dispose。
+- reducer不读DOM/Three/时间/localStorage；主关卡守卫active+running。hidden禁用输入但继续时钟；新文档导航/pagehide结束正式run，含BFCache；dispose解除监听/订阅，返回ready。
 
 ## 锁定的权重、计分与诚实结果
 
@@ -143,7 +143,7 @@ state 包含 config、stage、boardId、installedBySocket、edgesByBoard、selec
 
 新页只发 `{objectiveId,revision,verdict,usedHint}` facts，`session.record(facts)` 的公共适配器内部绑定 runId/seq、去重；本地不能设置事件运行 ID 或另存累计分。共享运行模块为 `src/shared/arcade/{types,session,scoring,storage,challenge-code}.ts`，共同 UI 为 `src/ui/arcade/{shell,results,assistant,styles}`。本页 `activityId` 为 `structure-lab`，稳定卡序来自 challenge-code，比较键精确为 `activityId + challengeCode + profile + contentVersion + scoringVersion + durationMs`。
 
-每个控制器通过共享 factory 创建页面拥有的 ArcadeSession，调用 `session.start(config)`、`session.record(facts)`、`session.finish(reason)`、`session.subscribe(listener)`、`session.setActive(active)`、`session.dispose()`；共享拥有时钟、去重与一次 finalize，没有全局 singleton 或第二份 store。教程结束再 start，subscribe 驱动共同 shell 的运行显示。hidden/后台/导航继续单调时钟，mounted run 随导航保留，主关卡输入守卫 active+running。刷新/页面退出关闭并存 interrupted/unranked，下一次挂载从预览开始、不恢复。
+专用bootstrap挂载页面拥有的ArcadeSession，接口保持start/record/finish/subscribe/setActive/dispose，共享拥有时钟、去重/finalize。hidden继续比赛时钟；真实按钮导航/pagehide/刷新结束正式run为interrupted/unranked，含BFCache persisted=true。返回pageshow从ready开始不恢复正式run；练习状态仅当前document内有效。共同游戏导航使用真实href，不保留mounted run跨文档。
 
 共同 results 注明“二维教学图示”；每项状态来源 `diagram`，毫米波再标 teaching。不能生成 model evidence 或维修胜任判断；准确展示本轮核验的安装/关系、真实部分结果和实际本机记录。比较只使用上述完整比较键；现场横向比较靠同学展示真实结果屏，公共说明明确各电脑只有自己的历史。
 
@@ -161,7 +161,9 @@ state 包含 config、stage、boardId、installedBySocket、edgesByBoard、selec
 | Create `src/activities/structure-lab/diagram-view.ts` | SVG 剖面、端口、部件/关系 overlay 按钮，消费纯状态 |
 | Create `src/activities/structure-lab/view.ts`、`styles.css` | 页壳、教程、资料、反馈和完成显示 |
 | Create `src/activities/structure-lab/controller.ts` | host scope 输入、pointer/键盘等价、active/dispose、公共 runtime 适配 |
-| Create `src/activities/structure-lab/index.ts` | 只导出 `view: string` 与 `mount(host: HTMLElement): ChapterController` |
+| Create `src/activities/structure-lab/index.ts` | 只导出view/mount供专用main消费，不注册进旧app runtime |
+| Create `games/structure/index.html`、`src/activities/structure-lab/main.ts` | 独立HTML/专用bootstrap，仅装载共同游戏导航与本游戏host；pagehide含BFCache关闭正式run，pageshow返回ready |
+| Modify `vite.config.ts`（集成代理） | 按新总计划配置index.html与三个games HTML的真实多入口，直接URL可构建/预览 |
 | Modify 原 `explore/controller.ts`、`view.ts`、`learning-view.ts` | GPT-6.1-sol集成代理删除旧13项启动器/面板/挂载以及data-learning-start/data-explore-learning；旧aside不留挑战链接，保留原3步/复习/归位/模型 |
 | Create `tests/unit/structure-lab/content.test.ts`、`state.test.ts`，`tests/e2e/structure-lab.spec.ts` | 图示语义、因果关系、去重、完整真实输入与旧页回归 |
 | Modify `docs/development/explore-content.md` | canonical 内容与图示规则维护；继续保留 GLB 与归位说明 |
@@ -207,7 +209,7 @@ state 包含 config、stage、boardId、installedBySocket、edgesByBoard、selec
 
 ### X4：剖面视图、等价操作与公共比赛适配
 
-**Files:** activity index/diagram-view/view/controller/styles、`tests/e2e/structure-lab.spec.ts`；集成代理将02顶部“结构挑战”注册到`#structure-lab` index view/mount，“拆解与交互”注册到`#explore`。
+**Files:** `games/structure/index.html`、activity main/index/diagram-view/view/controller/styles、`tests/e2e/structure-lab.spec.ts`；集成代理配置Vite多入口。main只装载本游戏view/mount与共同导航，顶部href分别为`/games/structure/index.html`、`/index.html#explore`，不注册旧app内部route。
 
 **Interfaces:** `export const view: string`；`export function mount(host: HTMLElement): ChapterController`；`renderStructureDiagram(host,state,content): void` 只消费判定。controller 由共享 session.ts factory 创建页面拥有的 ArcadeSession，消费共同 shell/results/assistant，subscribe 运行显示，将 facts 一次交 `session.record(facts)`，不创建本地 store。
 
@@ -216,22 +218,23 @@ state 包含 config、stage、boardId、installedBySocket、edgesByBoard、selec
 - [ ] SVG 配 DOM button overlay；每 part/socket/port/edge 有名称、方向、功能说明和 focus。鼠标/触屏可 click-select/place/connect，不强制拖动；Tab、Enter/Space 操作，Escape 取消选中，Delete 或明确“移除此关系”按钮等价删线。目标至少44×44，缩小屏幕也保持可点击尺寸。
 - [ ] 试运行动画消费已确认状态，600ms 内完成，reduced-motion 静态替代；拖放不计错，关系标签用文字+图标，错误使用 role=status。焦点在局部 render 后保留当前件/下一槽。
 - [ ] 接 session.start/record/finish/subscribe/setActive/dispose，scope清理监听/订阅；共同shell/results/assistant显示，不创建第二计时器/store。重练按 finish abandoned（仅旧run仍running）→整轮domain清空→start practice 执行。一般教程无facts，主学习输入守卫active+running。追加 `inactive_and_disposed_input_is_ignored`、`public_timeout_freezes_without_autofill`、`replay_has_new_run_without_duplicate_old_facts`、`practice_restart_finishes_old_run_before_new_start`、`hint_excludes_first_correct_but_keeps_repaired_completion_weight`、`shared_scoring_returns_1000_933_and_992`；重练断言新runId、全部目标零、score/elapsedMs null、旧fact不撤回；分数用共同scorer断言。
-- [ ] 在1440×900、768×1024、390×844运行触屏/键盘与reduced-motion；添加`direct_structure_deep_link_loads_no_3d`：新context直接打开`/#structure-lab`，无GLB/旧3D请求、无explore-workbench/model-canvas，游戏教程/HUD/results只在独立host。通过真实UI操作，不直接写状态，运行至PASS。
+- [ ] 在1440×900、768×1024、390×844运行触屏/键盘与reduced-motion；添加`direct_structure_deep_link_loads_no_3d`：新context直接打开`/games/structure/index.html`，无GLB/旧3D请求、无explore-workbench/model-canvas，游戏教程/HUD/results只在独立host。通过真实UI操作，不直接写状态，运行至PASS。
+- [ ] 添加`pagehide_bfcache_finalizes_interrupted_once`与`pageshow_returns_ready_without_formal_restore`：真实页面导航/BFCache前进后退都不恢复比赛目标，练习也只在当前document保留；单独hidden仍继续时钟，不把visibilitychange误当页面退出。
 
 ### X5：旧展厅入口迁移与互不污染回归
 
 **Files:** GPT-6.1-sol 集成代理 协调原 explore controller/view/learning-view 与导航；本计划更新指南和新/旧 E2E 回归。
 
-**Interfaces:** 02顶部“拆解与交互”`#explore` / “结构挑战”`#structure-lab`两个同级子按钮，替换整个主内容，恰好1个可见active页；新controller只拥有独立host，reset不分发原mission/powerflow/assembly action。
+**Interfaces:** 顶部真实href：/index.html#explore 与 /games/structure/index.html。每次加载独立HTML文档，不切换旧app内部host；view/mount由structure专用main消费，reset不分发旧mission/powerflow/assembly action。
 
-- [ ] 写`old_exhibit_retains_original_three_steps_review_and_assembly`、`new_diagram_runs_when_glb_fails`、`new_reset_does_not_change_old_observation_or_mission`、`navigation_and_hidden_continue_monotonic_contest_clock`、`refresh_records_interrupted_unranked_and_never_resumes`、`page_exit_finalizes_once`。追加`top_child_buttons_replace_entire_page`、`back_forward_keeps_exactly_one_visible_page`、`explore_has_no_learning_panel_or_launcher`、`hidden_other_page_is_inert`；旧3D页断言`[data-learning-start]`和`[data-explore-learning]`不存在。双向切按钮/前进后退均恰好1个可见active页，隐藏另页不能输入。旧raycast仍检查真实模型。
-- [ ] 集成代理删除旧view/aside的13项启动器、面板和输入，不留下challenge route链接；只由02顶部子按钮/直接route进入新独立页。保留原3步、复习、四步归位、分类/聚焦/开合/灯光/镜头恢复和5秒故事。新host不继承workbench/model-canvas；隐藏另页inert，两页不同时显示。
+- [ ] 写`old_exhibit_retains_original_three_steps_review_and_assembly`、`new_diagram_runs_when_glb_fails`、`game_reset_never_imports_or_mutates_exhibit_state`、`hidden_continues_clock_but_document_navigation_interrupts`、`refresh_records_interrupted_unranked_and_never_resumes`、`page_exit_finalizes_once`。追加`top_buttons_navigate_to_distinct_html_documents`、`back_forward_returns_ready_without_formal_resume`、`explore_has_no_learning_panel_or_launcher`、`other_game_document_is_not_mounted`；旧3D页断言`[data-learning-start]`和`[data-explore-learning]`不存在。双向按钮点击必须观察真实URL/document导航；前进后退返回ready，另一游戏host根本不在当前文档挂载。旧raycast仍检查真实模型。
+- [ ] 集成代理删除旧view/aside的13项启动器、面板和输入，不留下challenge route链接；只由02顶部子按钮/直接route进入新独立页。保留原3步、复习、四步归位、分类/聚焦/开合/灯光/镜头恢复和5秒故事。新HTML专用host不继承workbench/model-canvas，旧document不含隐藏游戏host。
 - [ ] 更新 `docs/development/explore-content.md`：列出单一 canonical、13 topic/图示/模型目标的区别、三个 graph、档位和正式分含义；保留原真实 GLB 与归位事实限制。
 - [ ] 运行 `npm run test:unit -- tests/unit/explore tests/unit/structure-lab`；GPT-6.1-sol 集成代理 串行运行 `npm run build`、`npm run test:e2e -- tests/e2e/structure-lab.spec.ts tests/e2e/explore-domain.spec.ts tests/e2e/chapters.spec.ts`，以及调整后的旧学习保留功能用例。
 - [ ] 检查新依赖图只指向共享内容/类型/纯规则与 arcade 模块/UI，不加载 old controller/rig/scene/Three。结果每项 source 均 diagram、没有第14个制动任务、没有第二套旧13项运行状态；比较键含活动/challengeCode/profile/contentVersion/scoringVersion/durationMs，刷新中断不排名，记录实际验证输出再交付。
 
 ## 交付验收与已锁定的公共依赖
 
-交付先核验整页分离：02顶部两按钮切`#explore`/`#structure-lab`的整个主内容，恰好1个可见active页，隐藏另页inert；旧3D无挑战启动器/面板，新深链不加载3D，教程/HUD/results只在独立host。再核验13主题来源、键盘/触屏完整操作、局部纠错/主动确认、各系统关系、旧3D控制/复习/归位保留及真实本机结果，无虚构模型命中或能力评级。
+交付先核验真实多页面：02顶部按钮通过href打开`/index.html#explore`或`/games/structure/index.html`，加载独立HTML文档，当前document只有本页host，不是旧app隐藏多页。旧3D无挑战启动器/面板，新URL不加载3D，教程/HUD/results只在新host。再核验原13主题/控制/复习/归位、完整输入/纠错及真实计分；文档导航含BFCache结束正式run，返回ready无恢复。
 
-依赖 GPT-6.1-sol 集成代理 交付共享 arcade 五个运行模块、共同四类 UI、`#structure-lab` 注册和已锁定的 session/view/mount 合同。本页不建立替代公共服务，也不扩大到经营、驾驶或新的3D归位游戏。文档完成一次自查：13主题+3图的1000权重、唯一共享公式、360秒默认、导航继续计时、刷新 interrupted/unranked、双档比较键、旧3步/复习/归位保留和单一13项面板一致；儿童可用性评估后只统一修订时长与版本。
+依赖GPT-6.1-sol集成代理交付Vite多HTML入口/专用bootstrap、共同游戏导航、共享arcade/UI及旧面板迁移；总负责人拥有架构/合同/审查。以新独立科普游戏总计划（含设计）为主合同，[计分工程合同](../../engineering/2026-11-08-science-arcade-scoring.md)保持同权重/公式/接口。hidden继续计时，真实文档导航/pagehide（含BFCache）结束正式run，返回ready无恢复；不复活已删除旧master/spec。

@@ -4,17 +4,17 @@
 
 **Goal:** 为三至六年级新增独立的 2D 传感器科学游戏，用发射、接收、扫描、测距和信息配合的直接操作完成一场约 3–6 分钟的挑战。
 
-**Architecture:** 新游戏放在 `src/activities/sensor-lab/`，通过 03 手风琴中的 `#sensor-lab` 独立路线进入；`src/app/chapters.ts` 的七个扁平pages及四个chapterGroups共同注册旧展品和新游戏，不另建活动注册文件。旧 3D 激光雷达展品仍走原控制器协议。纯内容和光程计算抽出供两者复用，新游戏不导入旧 controller、state、world、Three.js 或模型资源。竞赛、计时、分数卡和本地存储使用主计划锁定的共用 arcade 服务。
+**Architecture:** 新游戏模块放在src/activities/sensor-lab/，真实页面为/games/sensor/index.html；旧展品为/index.html#lidar。使用Vite多页构建，新HTML具有独立main/bootstrap/nav，只挂载本游戏，不导入旧应用runtime或旧展厅controller。activityId='sensor-lab'仅是业务标识，不是hash路由。纯内容与光程函数共享，竞赛/计分/存储沿用新总计划公共契约。
 
-sensor-lab使用独立完整页面host，顶栏导航切换整页内容；不会与旧展厅并排挂载、叠成双屏或在同一host塞入第二套活动。导航具体外观由总计划统一。
+顶栏游戏按钮使用真实页面链接，点击导航到/games/sensor/index.html并切换整个文档，不做原SPA内子页切换。游戏独立完整host，不与旧展厅并排挂载或叠双屏；返回展厅链接为/index.html#lidar。
 
 **Tech Stack:** 现有 TypeScript、Vite、SVG/HTML/CSS、Vitest、Playwright；不新增框架、3D 依赖、后台、账号或在线 AI 请求。
 
-**Spec:** `docs/superpowers/specs/2026-11-08-science-arcade-design.md`；公共实施顺序见 `docs/superpowers/plans/2026-11-08-science-arcade-plan.md`；评分契约 `docs/engineering/2026-11-08-science-arcade-scoring.md`。以上均为本轮方案，尚未实施。
+**Spec:** docs/superpowers/plans/2026-11-08-independent-science-games-plan.md包含设计、Vite多页架构与公共契约；评分细则见docs/engineering/2026-11-08-science-arcade-scoring.md。旧总计划/设计的删除保持原样。本轮仅方案，尚未实施。
 
 ## Global Constraints
 
-- 新路线#sensor-lab属于03手风琴；旧#lidar保留原八部件、四步原理展示、整机/爆炸/剖视、5–80m基础距离滑杆、扫描/暂停、模型降级与兼容入口。新增的旧guide/world/distance/weather学习面板迁往新游戏，不再在展品中挂载。
+- 新游戏真实地址/games/sensor/index.html；旧/index.html#lidar保留八部件、四步、整机/爆炸/剖视、5–80m基础滑杆、扫描/暂停、模型降级和兼容入口。旧新增guide/world/distance/weather学习面板迁往新游戏，不再挂载。
 - 主要体验是 2D 操作舞台，最多三个玩法；提示短而具体，不能换成三组选择题卡或自动播放课件。
 - `guided`（引导，建议三四年级）与 `standard`（标准，建议五六年级）档位分开比较，不采集年龄、生日、学校或真实姓名。
 - 一场包含三个顺序实验、六个唯一得分目标；正式预算360s、目标180s，练习不计时。以上默认值待真实儿童试用，不能宣称已验证适龄或时长。
@@ -29,7 +29,7 @@ sensor-lab使用独立完整页面host，顶栏导航切换整页内容；不会
 
 1. 相同挑战码在不同分辨率、帧率与输入设备上必须生成相同米制目标、返回证据和评分。
 2. 连续扫描同一角度、双击发射、重复接线或动画结束不能重复完成目标；错误或提示后重试能获探索完成分，但不获该目标首次验证分。
-3. 竞赛暂停/隐藏/站内切页继续预算，返回已挂载页面保留局；刷新或页面退出记中断且不恢复。练习无预算；这些行为不能借用旧3D生命周期。
+3. 正式暂停/浏览器隐藏继续单调预算；真实页面导航、刷新、pagehide含BFCache记interrupted。返回游戏为ready，不能恢复正式局；练习无预算，不借用旧3D生命周期。
 4. 缺 WebGL、缺旧 DAE/GLB、旧章迟到加载、docs JSON 不存在时，新 2D 游戏仍可进入和完成。
 5. 显示的距离、样点缺失、干扰点和反馈必须来自本次 snapshot；不能把未确认的空白显示成前方安全或把多装传感器说成总是可靠。
 
@@ -45,7 +45,7 @@ learning-world.ts依赖Three.js，用固定示意样点表现雨天额外回波�
 
 ## 玩法与一局流程
 
-推荐名称“回波侦探”。准备页展示两档、练习/正式、挑战码及六目标；舞台左侧是发射/接收工作台，中央是米制俯视测试场，右侧是回波证据板。各实验占用同一个舞台，完成后有明确“下一个实验”按钮，不靠延时自动跳关。正式种子来自公布的挑战码，不能用本地时钟自动随机，正式开始后不改变场景。开始前明确写“暂停、切页和后台时，挑战倒计时仍继续”。
+推荐名称“回波侦探”。准备页显示档位/练习正式/挑战码/六目标；独立页内部含工作台、米制舞台和证据板，各实验主动继续不自动跳关。正式种子只来自挑战码。开始前说明“暂停或后台时倒计时继续；跳转其他页面、刷新会中断本次正式挑战，返回不能恢复”。
 
 ### 玩法一：把光送出去，再接回来
 
@@ -95,13 +95,13 @@ guided发射角步长4°、教学光束半角6°、距离尺步长1m、标尺容
 | `src/activities/sensor-lab/view.ts`（新） | 2D SVG 和可访问 DOM 更新，只从 snapshot 读取 |
 | `src/activities/sensor-lab/controller.ts`（新） | 挂载、输入转动作、共享 run 事件、生命周期 |
 | `src/activities/sensor-lab/styles.css`（新） | 以 `.sensor-lab` 为作用域的桌面/触屏布局与反馈动画 |
-| `src/app/chapters.ts` 与现有app路线代码（主计划） | 七个pages和四个chapterGroups；注册 `#sensor-lab`、03手风琴入口和独立懒加载 |
+| `games/sensor/index.html`与独立main/bootstrap/nav（主计划） | Vite真实多页入口，游戏按钮导航到该HTML，独立挂载sensor模块；不注册原SPA七页 |
 | `src/shared/arcade/{types,session,scoring,storage,challenge-code}.ts`（主计划） | 统一session、挑战码、规则、计时与origin内记录 |
 | `src/ui/arcade/{shell,results,assistant}.ts` 与 `styles.css`（主计划） | 公共开始页、结果卡、确定性提示与UI样式 |
 
 确定接口：`createSensorScenario(setup:{seed:string;profile:'guided'|'standard';contentVersion:string}):SensorScenario`；`createSensorState(scenario:SensorScenario):SensorState`；`reduceSensorLab(state:SensorState,action:SensorAction,scenario:SensorScenario):SensorTransition`；`getSensorSnapshot(state,scenario):SensorSnapshot`。
 
-SensorTransition={state,facts}，DomainFact={objectiveId,revision,verdict:'correct'|'incorrect',usedHint}。真实编辑递增目标草稿revision，不完整或重复检查不发事实；提示先锁候选domain state。每个running操作先计算候选transition，再调用session.record(candidate.facts):boolean，只有true才提交candidate.state，空facts仍经过active/时钟守卫；false保留原state。session自身绑定runId/seq，record返回后microtask通知，避免最终成功回调抢先冻结候选；首次subscribe立即回调，故初始state先准备。活动导出view:string及mount(host):ChapterController，factory创建本页session；普通hash导航保留run、预算继续，pagehide含BFCache/dispose中断。bootstrap仅报告activeDraft，不自动结束另窗；UI明确点击“结束未完成挑战”才recoverInterruptedArcadeDraft(repo,expectedRunId)核对并中断一次，说明会结束对应其他窗口的局。mount不检查/恢复草稿，不恢复正式比赛。
+SensorTransition={state,facts}，DomainFact={objectiveId,revision,verdict:'correct'|'incorrect',usedHint}。真实编辑递增revision，不完整/重复检查不发事实；每个running操作先算候选再record(candidate.facts):boolean，仅true才提交state，空facts仍过守卫。session绑定runId/seq，record返回后microtask通知；首次subscribe立即，初始state先准备。模块导出view:string和mount(host):ChapterController，由独立HTML bootstrap调用，factory创建本页session，不挂载旧app。暂停/隐藏继续预算，页面导航/pagehide含BFCache/dispose中断；返回游戏显示ready，不恢复正式局。独立bootstrap只报告activeDraft；明确“结束未完成挑战”才按expectedRunId清理，说明会结束对应其他窗口的局。mount不恢复草稿。
 
 SensorSnapshot至少提供stage、ray、measuredTargets[{id,reflectivePoint,distanceMeters,roundTripNanoseconds,uniqueSampleIds}]、weatherEvidence[{targetId,visibleSampleIds,noiseSampleIds,confirmedFields}]、feedback。所有图示反射点、米数、纳秒及给分证据从这些字段读取。初版contentVersion='science-arcade-content-1'，公共scoringVersion拥有700/200/100公式与targetMs=180000，正式durationMs=360000。六个目标权重总和1000：pulse-hit:150、echo-received:100、outline-evidence:150、nearest-mark:200、sensor-evidence:200、risk-response:200；权重不是直接得分。结果status/reason仅completed|timeout|abandoned|interrupted。
 
@@ -131,12 +131,12 @@ SensorSnapshot至少提供stage、ray、measuredTargets[{id,reflectivePoint,dist
 
 ## Task S3：可操作的 2D 舞台与独立子路线
 
-**Files:** Create sensor-lab view/controller/styles；Modify主计划 `src/app/chapters.ts` 的sensor-lab page/group注册，不改旧lidar controller；Test `tests/e2e/sensor-lab.spec.ts`、`tests/unit/sensor-lab/controller.test.ts`。
+**Files:** Create sensor-lab view/controller/styles；Sol集成者接入games/sensor/index.html的独立main/bootstrap/nav和Vite多页输入，不注册原SPA七页；Test tests/e2e/sensor-lab.spec.ts、tests/unit/sensor-lab/controller.test.ts。
 
 **Interfaces:** Consumes S2 snapshot及公共session factory/shell；Producesview:string与mount(host):ChapterController。controller算候选、record boolean为true才提交领域状态，空facts仍过守卫；session绑定runId/seq、延后microtask通知、评分/计时/保存。公共文件由Sol集成代理修改。
 
 - [ ] E2E 先写真实鼠标/键盘两条完成路线、390×844触屏路线，分别操作方向、Rx连接、扫描旋钮、距离尺、两传感器接线、档位杆与提示灯；断言六目标和最终证据，不直接向 reducer 灌答案。
-- [ ] 测试record true才提交候选、false保留旧状态、空facts守卫、最后成功的订阅postreturn microtask且无回调竞态。重复active/dispose无重复监听；hash切页停止绘制但保留state与预算，pagehide含BFCache/dispose中断。bootstrap只报告，开B不结束A，明确expectedRunId清理才中断对应run；mount不恢复。迟到回调无更新，缺WebGL/DAE/GLB仍可完成。
+- [ ] 测试record true才提交候选、false保留原状态、空facts守卫、postreturn microtask无竞态。独立HTML直入和顶栏按钮跳页均挂本游戏，旧app/controller从未挂载；重复active/dispose无重复监听。隐藏继续预算，真实页面导航/pagehide含BFCache中断，返回ready无正式恢复。bootstrap只报告、开B不结束A、显式expectedRunId才清理；缺WebGL/DAE/GLB仍可完成。
 - [ ] 运行 `npm run test:e2e -- tests/e2e/sensor-lab.spec.ts` 和 controller 单元确认新页面缺失导致失败。
 - [ ] 实现三实验舞台与原生输入等效操作，接入独立路线；减少动画、非颜色提示和证据 DOM 列表一起交付。所有 hover 说明须可聚焦或点击展开。
 - [ ] 实际查看1440×900和390×844截图，验证18px正文、舞台标签、分项卡、接线替代控件、错误/重试无截断；运行构建、S1–S3与lidar-domain回归。迁移后的lidar-learning/learning-route测试把学习行为移至sensor-lab，不保留旧学习面板仍挂载的断言。
@@ -148,12 +148,12 @@ SensorSnapshot至少提供stage、ray、measuredTargets[{id,reflectivePoint,dist
 **Interfaces:** Consumes计分提案的挑战码、六目标、首次锁、单调时钟及本地结果服务；Produces本游戏有效结果，`activityId='sensor-lab'`，原旧LiDAR教学reducer不参与。
 
 - [ ] 两独立 browser context 输入同码、相同操作和假时钟，目标/证据/分项相同，而本地历史互不出现；不同档位分组，练习明确标记，正式重玩不能替换首轮记录。
-- [ ] 测试权重200的目标首次错后纠正或首次成功前看提示，在270s完成分项700/160/50=910；重复成功无加分，连胜不改分。隐藏/暂停/站内切页至360s到期得部分分，返回只能查看结果；180s时切页、240s返回保留state但累计240s；刷新/页面退出记interrupted且不恢复，旧3D暂停仍按旧语义。
+- [ ] 权重200目标首次错后修正或提示后首次成功、270s完成仍910；重复/连胜不改分。隐藏/暂停至360s超时；180s真实导航离开游戏产生一次interrupted且score=null，返回ready不能恢复该正式局。刷新/pagehide含BFCache同样中断；旧展品暂停按原语义。
 - [ ] 测试storage配额或禁用时分数卡可读且显示未保存，损坏键不白屏。回到旧LiDAR验证原5–80m基础滑杆、整机/爆炸/剖视、八部件、四步展示与扫描/暂停保持；旧新增learning-world、距离轮次和天气学习状态/事件不再挂载或更新。新练习抽屉承接guide、六卡和20/60m例；重开新游戏不重置旧基础展品控件。
 - [ ] 运行 `npm run test:unit -- tests/unit/sensor-lab tests/unit/arcade`、`npm run build` 及上述新旧E2E；通过后更新开发文档的共享 authoring 真源、版本参数、教学示意说明和完成证据。此方案阶段不声称这些测试已经运行。
 
 ## 实施依赖与范围外
 
-公共依赖已经锁定：`src/app/chapters.ts` 的七pages/四chapterGroups、`#sensor-lab`、`src/shared/arcade/`五个纯服务文件、`src/ui/arcade/`公共shell/results/assistant/styles、统一DomainFact和session协议。S1/S2纯模块可独立实施，S3/S4按主计划任务顺序接入这些服务。不存在另一个context或活动registry，也不得让sensor-lab依赖旧展品控制器。
+公共依赖由新独立游戏总计划锁定：Vite多页HTML/main/bootstrap/nav、/games/sensor/index.html、共享arcade和UI、DomainFact/session契约。S1/S2规则不改变，S3/S4接入独立文档；不新增原SPA七页注册，不依赖旧展品controller，不恢复已删除旧计划。
 
 本期不添加在线AI、多电脑自动榜、虚构班级排名、跨活动总分、打印/导出、教师聚合/导入、摄像头采集、真实传感器接口、任意地形编辑器、3D复刻、物理制动模拟或另一组天气题卡。各电脑显示同码同档位分数卡已满足比较；打印/导出单卡只属未来可选。真实儿童试用、档位容差和时长观察留给后续课堂验证，当前方案没有该证据。
